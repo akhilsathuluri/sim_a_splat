@@ -29,7 +29,9 @@ pixi run python demo_pusht_splat.py
 
 Upon running, you should see an interface similar to the one shown below, 
 
-<video src="assets/sim_a_splat_example.mp4" controls width="100%"></video>
+![sim_a_splat example](assets/sim_a_splat_example.gif)
+
+*Note: Replace with actual GIF file. GitHub supports GIF animations natively.*
 
 The demo uses Microsoft Edge browser with a split window functionality to view the two viewers simultaneously. 
 
