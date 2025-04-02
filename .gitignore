@@ -9,7 +9,7 @@ tmp/
 evals/
 exports/
 tests/
-
+assets/scara/
 
 ./*sh
 
