@@ -80,7 +80,6 @@ def main(render_size, control_hz):
             _, _, _, _ = env.step(act)
             _ = env.render(mode="human")
 
-            # render the splat_env
             if act is not None:
                 eef_action = map_actions(act)
                 _, _, sdone, _ = splat_env.step(eef_action, noobs=True)

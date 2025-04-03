@@ -15,6 +15,11 @@ logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
 # %%
+
+# splat location
+splat_path_string = "assets/scara/splatfacto/2025-04-02_181852/config.yml"
+
+# %%
 # for lite6-1
 # urdf_location = (
 #     Path("./robot_description/xarm_description/lite6/urdf/lite6.urdf")
@@ -38,7 +43,6 @@ output_dir = (
 )
 output_dir_path = Path(output_dir)
 output_dir_path.mkdir(parents=True, exist_ok=True)
-splat_path_string = "assets/robots-scene-v2/splatfacto/2024-12-06_150850/config.yml"
 robot_mesh_dir = Path("./robot_description/xarm_description/xarm6/").resolve()
 
 # %%
@@ -135,16 +139,16 @@ o3d.visualization.draw_plotly([splat_pcd])
 # %%
 vol = o3d.visualization.SelectionPolygonVolume()
 vol.orthogonal_axis = "Z"
-vol.axis_min = -0.312
-vol.axis_max = 0.2
+vol.axis_min = -0.55
+vol.axis_max = 0.016
 
 # for xarm6-2
 # fmt: off
 polygon_bounds = o3d.utility.Vector3dVector([
-    [0.3, -0.06, 0],
-    [0.49, -0.06, 0],
-    [0.49, 0.18, 0],
-    [0.3, 0.18, 0]
+    [-0.8, 0.02, 0],
+    [-0.8, 0.6, 0],
+    [0.05, 0.02, 0],
+    [0.05, 0.6, 0]
 ])
 vol.bounding_polygon = o3d.utility.Vector3dVector(polygon_bounds)
 
