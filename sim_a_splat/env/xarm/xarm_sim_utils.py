@@ -165,6 +165,42 @@ def add_env_objects(plant, scene_graph):
     return tblock
 
 
+# Helper function to add a cube body to the plant.
+def add_cube(plant, name, color, initial_height):
+    cube_size = 0.05
+    mass = 0.1  # kg
+    inertia = SpatialInertia.MakeBoxInertia(mass, [cube_size, cube_size, cube_size])
+    body = plant.AddRigidBody(name, inertia)
+    plant.RegisterVisualGeometry(
+        body,
+        RigidTransform(),
+        [cube_size, cube_size, cube_size],
+        geometry_name=name + "_vis",
+        color=color,
+    )
+    plant.RegisterCollisionGeometry(
+        body,
+        RigidTransform(),
+        [cube_size, cube_size, cube_size],
+        geometry_name=name + "_col",
+    )
+    return body
+
+
+def add_env_objects(plant, scene_graph):
+    parser = Parser(plant, scene_graph)
+    urdf_path = (
+        (
+            Path(__file__).resolve().parent.parent.parent.parent
+            / "assets/tblock_paper/tblock_paper.sdf"
+        )
+        .resolve()
+        .__str__()
+    )
+    tblock = parser.AddModels(urdf_path)[0]
+    return tblock
+
+
 def MakeHardwareStation(
     time_step,
     package_path,

@@ -77,6 +77,7 @@ class XarmGripperSimEnv:
         self.scene_graph = scene_graph
         if self.env_objects_flag:
             tblock = add_env_objects(plant, scene_graph)
+
         self.robot_model_instance, self.uid = AddRobotModel(
             plant=plant,
             scene_graph=scene_graph,
