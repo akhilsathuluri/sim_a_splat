@@ -24,6 +24,9 @@ from pydrake.all import (
     Cylinder,
 )
 import open3d as o3d
+from pydrake.systems.primitives import Multiplexer, ConstantVectorSource
+from pydrake.systems.framework import LeafSystem, BasicVector
+from pydrake.systems.primitives import PassThrough
 from drake import (
     lcmt_viewer_draw,
     lcmt_viewer_load_robot,
@@ -44,7 +47,7 @@ from sim_a_splat.env.xarm.xarm_sim_utils import (
 # %%
 
 
-class XarmSimEnv:
+class XarmGripperSimEnv:
     def __init__(
         self,
         env_objects=True,
@@ -129,8 +132,18 @@ class XarmSimEnv:
             station.GetOutputPort("robot_torque_commanded"),
             plant.get_actuation_input_port(self.robot_model_instance),
         )
+
+        gripper_system = builder.AddSystem(PassThrough(2))
+        builder.ExportInput(gripper_system.get_input_port(), "gripper_command")
+        joint_pos_size = pose2config.get_output_port().size()
+        mux = builder.AddSystem(Multiplexer([joint_pos_size, 2]))
+
+        # Connect the systems
+        builder.Connect(pose2config.get_output_port(), mux.get_input_port(0))
+        builder.Connect(gripper_system.get_output_port(), mux.get_input_port(1))
+
         builder.Connect(
-            pose2config.get_output_port(), station.GetInputPort("robot_state_desired")
+            mux.get_output_port(), station.GetInputPort("robot_state_desired")
         )
         builder.ExportInput(pose2config.GetInputPort("pose"), "desired_pose")
         builder.ExportOutput(
@@ -143,6 +156,9 @@ class XarmSimEnv:
         self.diagram = builder.Build()
         self.simulator = Simulator(self.diagram)
         self.pose_input_port = self.simulator.get_system().GetInputPort("desired_pose")
+        self.gripper_input_port = self.simulator.get_system().GetInputPort(
+            "gripper_command"
+        )
         self.state_output_port = self.simulator.get_system().GetOutputPort(
             "system_state_output_port"
         )
@@ -173,6 +189,10 @@ class XarmSimEnv:
             self.diagram_context,
             RigidTransform(RollPitchYaw(3.14, 0, 0), reset_to_state[0]),
         )
+        self.gripper_input_port.FixValue(
+            self.diagram_context, self.np_random.uniform([-0.045, -0.045], [0, 0])
+        )
+
         reset_to_state[1][2] = 0
         block_pose = np.hstack(
             (
@@ -194,15 +214,17 @@ class XarmSimEnv:
                 np.zeros(6),
             )
         jpos = self.desired_joint_position.Eval(self.diagram_context)
+        eefpos = self.gripper_input_port.Eval(self.diagram_context)
+        robotpos = np.concatenate((jpos, eefpos))
         self.plant.SetPositions(
             self.plant_context,
             self.robot_model_instance,
-            jpos,
+            robotpos,
         )
         self.plant.SetVelocities(
             self.plant_context,
             self.robot_model_instance,
-            np.zeros(len(jpos)),
+            np.zeros(len(robotpos)),
         )
         reset_to_state[2][2] = 0
         self.goal_pose_transform = RigidTransform(
@@ -262,8 +284,9 @@ class XarmSimEnv:
 
     def step(self, action, no_obs=False):
         self.pose_input_port.FixValue(
-            self.diagram_context, RigidTransform(RollPitchYaw(3.14, 0, 0), action)
+            self.diagram_context, RigidTransform(RollPitchYaw(3.14, 0, 0), action[:3])
         )
+        self.gripper_input_port.FixValue(self.diagram_context, action[3:])
         try:
             self.simulator.AdvanceTo(self.simulator_context.get_time() + self.time_step)
         except RuntimeError as e:
@@ -309,7 +332,8 @@ class XarmSimEnv:
 
     def _get_action(self):
         desired_eef_pose = self.pose_input_port.Eval(self.diagram_context)
-        return desired_eef_pose.translation()
+        desired_gripper_state = self.gripper_input_port.Eval(self.diagram_context)
+        return np.concatenate((desired_eef_pose.translation(), desired_gripper_state))
 
     def _get_info(self):
         robot_state = self.plant.get_state_output_port(self.robot_model_instance).Eval(
