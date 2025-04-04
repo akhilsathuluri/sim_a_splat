@@ -44,7 +44,7 @@ from sim_a_splat.env.xarm.xarm_sim_utils import (
     add_soft_collisions,
     AddRobotModel,
     add_env_objects,
-    add_cube,
+    # add_cube,
     MakeHardwareStation,
 )
 
@@ -84,28 +84,48 @@ class XarmGripperSimEnv:
             x_mid = 0.475
             y_mid = 0.0
             cube_size = 0.050
-            small_offset = 0.0015
-            red_cube = add_cube(
-                plant,
-                "red_cube",
-                np.array([1, 0, 0, 1]),
-                np.array([x_mid, y_mid, 5 * cube_size / 2 + 3 * small_offset]),
-                cube_size=cube_size,
+            small_offset = 0.002
+            # red_cube = add_cube(
+            #     plant,
+            #     "red_cube",
+            #     np.array([1, 0, 0, 1]),
+            #     np.array([x_mid, y_mid, 5 * cube_size / 2 + 3 * small_offset]),
+            #     cube_size=cube_size,
+            # )
+            # blue_cube = add_cube(
+            #     plant,
+            #     "blue_cube",
+            #     np.array([0, 0, 1, 1]),
+            #     np.array([x_mid, y_mid, 3 * cube_size / 2 + 2 * small_offset]),
+            #     cube_size=cube_size,
+            # )
+            # green_cube = add_cube(
+            #     plant,
+            #     "green_cube",
+            #     np.array([0, 1, 0, 1]),
+            #     np.array([x_mid, y_mid, cube_size / 2 + small_offset]),
+            #     cube_size=cube_size,
+            # )
+            green_cube = add_env_objects(
+                plant=plant,
+                scene_graph=scene_graph,
+                object_path="assets/bricks/foam_brick.sdf",
+                init_pose=RigidTransform(
+                    RotationMatrix(),
+                    np.array([x_mid, y_mid, cube_size / 2 + small_offset]),
+                ),
+                prefix="green_cube",
             )
-            blue_cube = add_cube(
-                plant,
-                "blue_cube",
-                np.array([0, 0, 1, 1]),
-                np.array([x_mid, y_mid, 3 * cube_size / 2 + 2 * small_offset]),
-                cube_size=cube_size,
-            )
-            green_cube = add_cube(
-                plant,
-                "green_cube",
-                np.array([0, 1, 0, 1]),
-                np.array([x_mid, y_mid, cube_size / 2 + small_offset]),
-                cube_size=cube_size,
-            )
+            # blue_cube = add_env_objects(
+            #     plant=plant,
+            #     scene_graph=scene_graph,
+            #     object_path="assets/bricks/foam_brick.sdf",
+            #     init_pose=RigidTransform(
+            #         RotationMatrix(),
+            #         np.array([x_mid, y_mid, 3 * cube_size / 2 + 2 * small_offset]),
+            #     ),
+            #     prefix="blue_cube",
+            # )
 
             pass
         self.robot_model_instance, self.uid = AddRobotModel(
@@ -130,27 +150,12 @@ class XarmGripperSimEnv:
                 model_instance=self.robot_model_instance,
             ),
         )
-        # plant.RegisterVisualGeometry(
-        #     body=eef_body,
-        #     X_BG=RigidTransform(),
-        #     shape=Sphere(0.01),
-        #     name=self.eef_link_name + "_vis",
-        #     diffuse_color=np.array([1.0, 1.0, 1.0, 1.0]),
-        # )
-        # offset_to_base_link = RigidTransform([0.0, 0.0, 0.15])
-        # plant.WeldFrames(
-        #     eef_base_link.body_frame(), eef_body.body_frame(), offset_to_base_link
-        # )
-        # TODO: Modify API to enable loading the same robot multiple times
-        # self.eef_link_name = self.eef_link_name + "_" + str(self.uid)
-        # self.eef_link_name = self.eef_link_name
-        # assumes robot model to be a 6DoF robot arm with fixed base in urdf
-        # TODO: Create API to easily make wrappers around anytype of robot and with an inverse dynamics controller
+        # plant.set_contact_model(ContactModel.kHydroelasticsOnly)
         plant.set_contact_model(ContactModel.kHydroelasticWithFallback)
         add_ground_with_friction(plant)
-        plant.set_penetration_allowance(1e-5)
-        collision_filter_manager = scene_graph.collision_filter_manager()
-        gripper_finger_names = ["left_finger", "right_finger"]
+        plant.set_penetration_allowance(1e-4)
+        # collision_filter_manager = scene_graph.collision_filter_manager()
+        # gripper_finger_names = ["left_finger", "right_finger"]
         add_soft_collisions(
             plant,
             "right_finger",
@@ -165,26 +170,24 @@ class XarmGripperSimEnv:
             # Sphere(0.015),
             offset=RigidTransform(np.array([0.0, -0.02, 0.05])),
         )
-        for ii in gripper_finger_names:
-            collision_filter_manager.Apply(
-                CollisionFilterDeclaration().ExcludeBetween(
-                    GeometrySet(
-                        plant.GetCollisionGeometriesForBody(
-                            plant.GetBodyByName(
-                                ii,
-                                self.robot_model_instance,
-                            )
-                        )
-                    ),
-                    GeometrySet(
-                        plant.GetCollisionGeometriesForBody(plant.world_body())
-                    ),
-                )
-            )
+        # for ii in gripper_finger_names:
+        #     collision_filter_manager.Apply(
+        #         CollisionFilterDeclaration().ExcludeBetween(
+        #             GeometrySet(
+        #                 plant.GetCollisionGeometriesForBody(
+        #                     plant.GetBodyByName(
+        #                         ii,
+        #                         self.robot_model_instance,
+        #                     )
+        #                 )
+        #             ),
+        #             GeometrySet(
+        #                 plant.GetCollisionGeometriesForBody(plant.world_body())
+        #             ),
+        #         )
+        #     )
         plant.Finalize()
         self.nq = plant.num_positions(self.robot_model_instance)
-        # self.end_effector_body = plant.GetBodyByName(self.eef_link_name)
-        # self.end_effector_frame = self.end_effector_body.body_frame()
         station = builder.AddSystem(
             MakeHardwareStation(
                 self.time_step,
@@ -265,27 +268,7 @@ class XarmGripperSimEnv:
         self.gripper_input_port.FixValue(
             self.diagram_context, self.np_random.uniform([-0.045, -0.045], [0, 0])
         )
-
-        # reset_to_state[1][2] = 0
-        # block_pose = np.hstack(
-        #     (
-        #         RotationMatrix(RollPitchYaw(0, 0, -reset_to_state[1][3]))
-        #         .ToQuaternion()
-        #         .wxyz(),
-        #         reset_to_state[1][:3],
-        #     )
-        # )
         if self.env_objects_flag:
-            # self.plant.SetPositions(
-            #     self.plant_context,
-            #     self.plant.GetModelInstanceByName("tblock_paper"),
-            #     block_pose,
-            # )
-            # self.plant.SetVelocities(
-            #     self.plant_context,
-            #     self.plant.GetModelInstanceByName("tblock_paper"),
-            #     np.zeros(6),
-            # )
             pass
         jpos = self.desired_joint_position.Eval(self.diagram_context)
         eefpos = self.gripper_input_port.Eval(self.diagram_context)
@@ -330,32 +313,6 @@ class XarmGripperSimEnv:
             )
             self.meshcat.SetTransform("eef_goal", RigidTransform(end_location))
 
-    # def publish_tblock_marker(self, block_pose_transform, color=Rgba(1, 0, 0, 1)):
-    #     if self.visualize_robot_flag and self.active_meshcat:
-    #         mesh_path = (
-    #             Path(__file__).resolve().parent.parent.parent.parent
-    #             / "assets/tblock_paper/tblock_paper.obj"
-    #         )
-    #         tblock_mesh = o3d.io.read_triangle_mesh(Path(mesh_path).resolve().__str__())
-    #         triangles = np.asarray(tblock_mesh.triangles)
-    #         tblock_mesh_drake = TriangleSurfaceMesh(
-    #             triangles=[
-    #                 SurfaceTriangle(triangle[0], triangle[1], triangle[2])
-    #                 for triangle in triangles
-    #             ],
-    #             vertices=np.asarray(tblock_mesh.vertices),
-    #         )
-    #         self.meshcat.SetObject("block_marker/mesh", tblock_mesh_drake, color)
-    #         self.meshcat.SetTransform("block_marker/mesh", block_pose_transform)
-
-    #         msg = lcmt_viewer_draw()
-    #         msg.num_links = 1
-    #         msg.link_name = ["block_marker"]
-    #         msg.robot_num = [3]
-    #         msg.position = [block_pose_transform.translation()]
-    #         msg.quaternion = [block_pose_transform.rotation().ToQuaternion().wxyz()]
-    #         self.lcm.Publish("DRAKE_VIEWER_DRAW", msg.encode())
-
     def step(self, action, no_obs=False):
         self.pose_input_port.FixValue(
             self.diagram_context, RigidTransform(RollPitchYaw(3.14, 0, 0), action[:3])
@@ -369,31 +326,9 @@ class XarmGripperSimEnv:
         info = self._get_info()
         reward = 0.0
         done = False
-        # reward = self._compute_reward(info)
-        # done = self._is_done(info, reward)
-        # if done:
-        #     end_location = np.array([0.25, 0.3, 0.2])
-        #     # self.publish_robot_end_location(end_location=end_location)
-        #     if type(observation) is tuple:
-        #         eef_goal_dist = np.linalg.norm(observation[0][:2] - end_location[:2])
-        #     else:
-        #         eef_goal_dist = np.linalg.norm(
-        #             observation["robot_eef_pos"] - end_location[:2]
-        #         )
-        #     if eef_goal_dist > 0.008:
-        #         done = False
-        # else:
-        #     try:
-        #         self.meshcat.Delete("eef_goal")
-        #     except:
-        #         pass
-
         return observation, reward, done, info
 
     def _get_obs(self):
-        # eef_pose = self.plant.EvalBodyPoseInWorld(
-        #     self.plant_context, self.end_effector_body
-        # )
         eef_pose = self.plant.CalcRelativeTransform(
             self.plant_context,
             self.plant.world_frame(),
@@ -402,9 +337,6 @@ class XarmGripperSimEnv:
 
         eef_pos = eef_pose.translation()
         eef_quat = eef_pose.rotation().ToQuaternion().wxyz()
-        # eef_vel = self.plant.EvalBodySpatialVelocityInWorld(
-        #     self.plant_context, self.end_effector_body
-        # )
         eef_vel = self.end_effector_frame.CalcRelativeSpatialVelocityInWorld(
             self.plant_context, self.plant.world_frame()
         )
@@ -426,18 +358,6 @@ class XarmGripperSimEnv:
         )
         robot_pos = robot_state[: self.nq]
         robot_vel = robot_state[self.nq :]
-
-        # block_state = self.plant.get_state_output_port(
-        #     self.plant.GetModelInstanceByName("tblock_paper")
-        # ).Eval(self.plant_context)
-
-        # block_pose = block_state[:7]
-        # block_vel = block_state[7:]
-
-        # eef_pose = self.plant.EvalBodyPoseInWorld(
-        #     self.plant_context, self.end_effector_body
-        # )
-
         eef_pose = self.plant.CalcRelativeTransform(
             self.plant_context,
             self.plant.world_frame(),
@@ -446,11 +366,6 @@ class XarmGripperSimEnv:
 
         eef_pos = eef_pose.translation()
         eef_quat = eef_pose.rotation().ToQuaternion().wxyz()
-
-        # eef_vel = self.plant.EvalBodySpatialVelocityInWorld(
-        #     self.plant_context, self.end_effector_body
-        # )
-
         eef_vel = self.end_effector_frame.CalcRelativeSpatialVelocityInWorld(
             self.plant_context, self.plant.world_frame()
         )
@@ -458,9 +373,7 @@ class XarmGripperSimEnv:
         info = {
             "robot_pos": robot_pos,
             "robot_vel": robot_vel,
-            # "block_pose": block_pose,
             "block_pose": np.array([1, 0, 0, 0, 0, 0, 0]),
-            # "block_vel": block_vel,
             "eef_pos": eef_pos,
             "eef_quat": eef_quat,
             "eef_vel": eef_vel.translational(),
@@ -470,19 +383,6 @@ class XarmGripperSimEnv:
         return info
 
     def _compute_reward(self, info):
-        # goal_pos = self.goal_pose_transform.translation()
-        # block_pos = info["block_pose"][4:]
-        # r1 = -np.linalg.norm(goal_pos - block_pos)
-
-        # goal_yaw = self.goal_pose_transform.rotation().ToRollPitchYaw().vector()[2]
-        # quat = info["block_pose"][:4]
-        # block_yaw = (
-        #     RotationMatrix(Quaternion(quat / np.linalg.norm(quat)))
-        #     .ToRollPitchYaw()
-        #     .vector()
-        # )[2]
-        # r2 = -np.abs(goal_yaw - block_yaw)
-        # return r1 + r2
         return 0.0
         pass
 
@@ -503,17 +403,6 @@ class XarmGripperSimEnv:
             np.zeros(len(state["robot_pos"])),
         )
         if self.env_objects_flag:
-            # fully free block
-            # self.plant.SetPositions(
-            #     self.plant_context,
-            #     self.plant.GetModelInstanceByName("tblock_paper"),
-            #     state["block_pose"],
-            # )
-            # self.plant.SetVelocities(
-            #     self.plant_context,
-            #     self.plant.GetModelInstanceByName("tblock_paper"),
-            #     np.zeros(6),
-            # )
             pass
         self.simulator_context.SetTime(state["timestamp"])
 
