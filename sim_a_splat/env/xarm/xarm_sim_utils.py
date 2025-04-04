@@ -21,6 +21,8 @@ from pydrake.all import (
     Frame,
     SpatialInertia,
     UnitInertia,
+    Box,
+    Rgba,
 )
 import numpy as np
 from sak.URDFutils import URDFutils
@@ -72,19 +74,17 @@ class PoseToConfig(LeafSystem):
 
 
 def add_ground_with_friction(plant):
-    dissipation = 5e2
-    slab_thickness = 5.0
-    hydroelastic_modulus = 5e6
-
     proximity_properties_ground = ProximityProperties()
     AddContactMaterial(
-        dissipation=dissipation,
-        friction=CoulombFriction(static_friction=1.0, dynamic_friction=1.0),
+        dissipation=5e0,
+        friction=CoulombFriction(static_friction=0.6, dynamic_friction=0.5),
         properties=proximity_properties_ground,
     )
     # taken from: https://github.com/vincekurtz/drake_ddp/blob/b4b22a55448121153f992cae453236f7f5891b23/panda_fr3.py#L79
     AddCompliantHydroelasticPropertiesForHalfSpace(
-        slab_thickness, hydroelastic_modulus, proximity_properties_ground
+        slab_thickness=5.0,
+        hydroelastic_modulus=5e6,
+        properties=proximity_properties_ground,
     )
 
     plant.RegisterCollisionGeometry(
@@ -96,22 +96,28 @@ def add_ground_with_friction(plant):
     )
 
 
-def add_soft_collisions(plant, eef_link_name):
-    dissipation = 1e4
-    point_stiffness = 1e7
-    surface_friction_feet = CoulombFriction(static_friction=0, dynamic_friction=0)
+def add_soft_collisions(
+    plant,
+    eef_link_name,
+    body=Cylinder(radius=0.013, length=0.05),
+    offset=RigidTransform(np.array([0.0, 0, 0.0])),
+):
+    surface_friction_feet = CoulombFriction(static_friction=5.0, dynamic_friction=5.0)
     proximity_properties_feet = ProximityProperties()
     AddContactMaterial(
-        dissipation, point_stiffness, surface_friction_feet, proximity_properties_feet
+        dissipation=1e1,
+        friction=surface_friction_feet,
+        properties=proximity_properties_feet,
     )
-    AddCompliantHydroelasticProperties(0.05, 5e6, proximity_properties_feet)
-
-    radius, length = 0.013, 0.05
-    offset = np.array([0.0, 0, 0.19])
+    AddCompliantHydroelasticProperties(
+        resolution_hint=0.01,
+        hydroelastic_modulus=1e6,
+        properties=proximity_properties_feet,
+    )
     plant.RegisterCollisionGeometry(
         plant.GetBodyByName(eef_link_name),
         RigidTransform(offset),
-        Cylinder(radius=radius, length=length),
+        body,
         eef_link_name + "_collision",
         proximity_properties_feet,
     )
@@ -166,24 +172,34 @@ def add_env_objects(plant, scene_graph):
 
 
 # Helper function to add a cube body to the plant.
-def add_cube(plant, name, color, initial_height):
-    cube_size = 0.05
-    mass = 0.1  # kg
-    inertia = SpatialInertia.MakeBoxInertia(mass, [cube_size, cube_size, cube_size])
+def add_cube(plant, name, color, initial_position, cube_size=0.05):
+    density = 1040  # kg/m^3 -- ABS
+    inertia = SpatialInertia.SolidCubeWithDensity(density, cube_size)
     body = plant.AddRigidBody(name, inertia)
     plant.RegisterVisualGeometry(
-        body,
-        RigidTransform(),
-        [cube_size, cube_size, cube_size],
-        geometry_name=name + "_vis",
-        color=color,
+        body=body,
+        X_BG=RigidTransform(),
+        shape=Box(cube_size, cube_size, cube_size),
+        name=name + "_vis",
+        diffuse_color=color,
+    )
+    proximity_properties = ProximityProperties()
+    surface_friction = CoulombFriction(static_friction=1.0, dynamic_friction=1.0)
+    AddContactMaterial(
+        dissipation=5e0, friction=surface_friction, properties=proximity_properties
+    )
+    AddCompliantHydroelasticProperties(
+        resolution_hint=5e-1, hydroelastic_modulus=1e6, properties=proximity_properties
     )
     plant.RegisterCollisionGeometry(
-        body,
-        RigidTransform(),
-        [cube_size, cube_size, cube_size],
-        geometry_name=name + "_col",
+        body=body,
+        X_BG=RigidTransform(),
+        shape=Box(cube_size, cube_size, cube_size),
+        name=name + "_col",
+        properties=proximity_properties,
     )
+    X_WB = RigidTransform(RotationMatrix(), initial_position)
+    plant.SetDefaultFreeBodyPose(body, X_WB)
     return body
 
 
@@ -226,9 +242,9 @@ def MakeHardwareStation(
     robot_controller = builder.AddSystem(
         InverseDynamicsController(
             controller_plant,
-            kp=[400.0] * control_plant_pos,
-            ki=[0.0] * control_plant_pos,
-            kd=[40.0] * control_plant_pos,
+            kp=[100.0] * (control_plant_pos - 2) + [100.0] * 2,
+            ki=[0.0] * (control_plant_pos - 2) + [0.0] * 2,
+            kd=[20.0] * (control_plant_pos - 2) + [20.0] * 2,
             has_reference_acceleration=False,
         )
     )
