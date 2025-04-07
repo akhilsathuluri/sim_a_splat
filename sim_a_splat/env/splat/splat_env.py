@@ -5,6 +5,7 @@ import logging
 import time
 from tqdm import tqdm
 from pathlib import Path
+
 from sim_a_splat.env.xarm.xarm_env import XarmSimEnv
 from sim_a_splat.splat.splat_handler import SplatHandler
 
@@ -31,6 +32,7 @@ class SplatEnv(XarmSimEnv):
             package_name=package_name,
             urdf_name=urdf_name,
         )
+        self.eef_link_name = eef_link_name
         super(SplatEnv, self).load_model()
         self.ch = self._setup_splats()
         # dafault fixed cam pose for xarm6-1 robot
@@ -94,7 +96,7 @@ class SplatEnv(XarmSimEnv):
 
     def get_moving_camera_poses(self, msg):
         wxyz, xyz = self.splat_handler.get_attached_frame(
-            "push_gripper_base_link", np.array([-0.1, 0, 0.033]), msg
+            self.eef_link_name, np.array([-0.1, 0, 0.033]), msg
         )
         cam_pose_02 = tf.SE3(wxyz_xyz=np.concatenate((wxyz, xyz)))
         return [cam_pose_02]

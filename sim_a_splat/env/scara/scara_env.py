@@ -2,7 +2,6 @@
 
 from pathlib import Path
 import logging
-
 import numpy as np
 from pydrake.all import (
     RigidTransform,
@@ -31,7 +30,7 @@ from drake import (
     lcmt_viewer_geometry_data,
 )
 
-from sim_a_splat.env.xarm.xarm_sim_utils import (
+from sim_a_splat.env.manipulator.sim_utils import (
     PoseToConfig,
     add_ground_with_friction,
     add_soft_collisions,
@@ -45,7 +44,7 @@ from sim_a_splat.env.manipulator.base_robot_env import BaseRobotEnv
 # %%
 
 
-class XarmSimEnv(BaseRobotEnv):
+class ScaraSimEnv(BaseRobotEnv):
     def __init__(
         self,
         env_objects=True,
@@ -74,7 +73,7 @@ class XarmSimEnv(BaseRobotEnv):
         )
         self.scene_graph = scene_graph
         if self.env_objects_flag:
-            tblock = add_env_objects(plant, scene_graph)
+            _ = add_env_objects(plant, scene_graph)
         self.robot_model_instance, self.uid = AddRobotModel(
             plant=plant,
             scene_graph=scene_graph,
@@ -90,7 +89,8 @@ class XarmSimEnv(BaseRobotEnv):
         # TODO: Create API to easily make wrappers around anytype of robot and with an inverse dynamics controller
         plant.set_contact_model(ContactModel.kHydroelasticsOnly)
         add_ground_with_friction(plant)
-        add_soft_collisions(plant, eef_link_name=self.eef_link_name)
+        if self.eef_link_name != "":
+            add_soft_collisions(plant, eef_link_name=self.eef_link_name)
         plant.set_penetration_allowance(1e-5)
         collision_filter_manager = scene_graph.collision_filter_manager()
         collision_filter_manager.Apply(
