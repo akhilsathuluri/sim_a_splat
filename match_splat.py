@@ -19,31 +19,18 @@ logging.getLogger().setLevel(logging.INFO)
 # splat location
 splat_path_string = "assets/scara/splatfacto/2025-04-02_181852/config.yml"
 
-# %%
-# for lite6-1
-# urdf_location = (
-#     Path("./robot_description/xarm_description/lite6/urdf/lite6.urdf")
-#     .resolve()
-#     .__str__()
-# )
-# package_tag = "package://lite6"
-# match_object_name = "lite6-1"
-
-# for xarm6-2
+# for scara
 urdf_location = (
-    Path("./robot_description/xarm_description/xarm6/urdf/xarm6_with_push_gripper.urdf")
-    .resolve()
-    .__str__()
+    Path("./robot_description/scara/urdf/robot-assembly-2.urdf").resolve().__str__()
 )
-match_object_name = "xarm6-2"
-package_tag = "package://xarm6"
+match_object_name = "scara"
+package_tag = "package://robot-assembly-2"
 
-output_dir = (
-    Path("assets/robots-scene-v2/masks" + f"/{match_object_name}/").resolve().__str__()
-)
+output_dir = Path("assets/scara/masks" + f"/{match_object_name}/").resolve().__str__()
 output_dir_path = Path(output_dir)
 output_dir_path.mkdir(parents=True, exist_ok=True)
-robot_mesh_dir = Path("./robot_description/xarm_description/xarm6/").resolve()
+robot_mesh_dir = Path("./robot_description/scara/").resolve()
+
 
 # %%
 with open(urdf_location, "r") as file:
@@ -68,7 +55,7 @@ actuated_joints = []
 for joint in robot.joints:
     if joint.joint_type != "fixed":
         actuated_joints.append(joint.name)
-joint_config = [0] * 6 + [0.85] * 6
+joint_config = [0, -np.pi / 2]
 cfg = dict(zip(actuated_joints, joint_config))
 translist = robot.visual_geometry_fk(cfg)
 
@@ -84,9 +71,9 @@ for ii in range(len(robot.links)):
             meshes.append(mesh)
 
 # %%
-select_meshes = meshes[:7]
-if len(select_meshes) == 1:
-    select_meshes = [select_meshes]
+select_meshes = meshes[:]
+# if len(select_meshes) == 1:
+#     select_meshes = [select_meshes]
 
 # %%
 
@@ -99,6 +86,7 @@ for mesh in select_meshes:
 
 # %%
 temp_pcd_path = Path(output_dir + "/point_cloud.pcd")
+# temp_pcd_path = Path(output_dir + "/point_cloud_l1.pcd")
 if temp_pcd_path.exists():
     temp_robot_pcd = o3d.io.read_point_cloud(str(temp_pcd_path))
 else:
@@ -106,9 +94,44 @@ else:
     o3d.io.write_point_cloud(str(temp_pcd_path), point_cloud)
     temp_robot_pcd = point_cloud
 
-# %%
-o3d.visualization.draw_plotly([temp_robot_pcd])
+# o3d.visualization.draw_plotly([temp_robot_pcd])
+
+# if point clound needs to be cropped -- l2
+# vol = o3d.visualization.SelectionPolygonVolume()
+# vol.orthogonal_axis = "Z"
+# vol.axis_min = 0.71
+# vol.axis_max = 0.95
+# # fmt: off
+# polygon_bounds = o3d.utility.Vector3dVector([
+#     [0.57, -1.6, 0],
+#     [0.8, -1.6, 0],
+#     [0.8, -1.1, 0],
+#     [0.57, -1.1, 0]
+# ])
+# # fmt: on
+# vol.bounding_polygon = polygon_bounds
+# temp_robot_pcd = vol.crop_point_cloud(temp_robot_pcd)
+# robot_pcd = temp_robot_pcd
+# o3d.visualization.draw_plotly([robot_pcd])
+
+# l1
+# vol = o3d.visualization.SelectionPolygonVolume()
+# vol.orthogonal_axis = "Z"
+# vol.axis_min = 0.7
+# vol.axis_max = 0.8
+# # fmt: off
+# polygon_bounds = o3d.utility.Vector3dVector([
+#     [0.45, -1.6, 0],
+#     [0.5, -1.6, 0],
+#     [0.5, -1.36, 0],
+#     [0.45, -1.36, 0]
+# ])
+# # fmt: on
+# vol.bounding_polygon = polygon_bounds
+# temp_robot_pcd = vol.crop_point_cloud(temp_robot_pcd)
+
 robot_pcd = temp_robot_pcd
+o3d.visualization.draw_plotly([robot_pcd])
 
 # %%
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -134,38 +157,65 @@ splat_pcd = o3d.geometry.PointCloud()
 splat_pcd.points = o3d.utility.Vector3dVector(means)
 
 # %%
-o3d.visualization.draw_plotly([splat_pcd])
+# o3d.visualization.draw_plotly([splat_pcd])
 
 # %%
+# l1
+# vol = o3d.visualization.SelectionPolygonVolume()
+# vol.orthogonal_axis = "Z"
+# vol.axis_min = -0.49
+# vol.axis_max = -0.2
+
+# # for xarm6-2
+# # fmt: off
+# polygon_bounds = o3d.utility.Vector3dVector([
+#     [-0.3, 0.02, 0],
+#     [-0.3, 0.67, 0],
+#     [0.05, 0.67, 0],
+#     [0.05, 0.02, 0]
+# ])
+# vol.bounding_polygon = polygon_bounds
+
+
+# l2
+# vol = o3d.visualization.SelectionPolygonVolume()
+# vol.orthogonal_axis = "Z"
+# vol.axis_min = -0.45
+# vol.axis_max = -0.2
+
+# # for xarm6-2
+# # fmt: off
+# polygon_bounds = o3d.utility.Vector3dVector([
+#     [-0.53, 0.02, 0],
+#     [-0.53, 0.29, 0],
+#     [-0.4, 0.29, 0],
+#     [-0.4, 0.02, 0]
+# ])
+# vol.bounding_polygon = polygon_bounds
+
+# crop_robot = vol.crop_point_cloud(splat_pcd)
+# o3d.visualization.draw_plotly([crop_robot])
+
+# whole scan
 vol = o3d.visualization.SelectionPolygonVolume()
 vol.orthogonal_axis = "Z"
-vol.axis_min = -0.55
-vol.axis_max = 0.016
+vol.axis_min = -0.60
+vol.axis_max = 0.02
 
-# for xarm6-2
 # fmt: off
 polygon_bounds = o3d.utility.Vector3dVector([
-    [-0.8, 0.02, 0],
-    [-0.8, 0.6, 0],
-    [0.05, 0.02, 0],
-    [0.05, 0.6, 0]
+    [-0.71, 0.02, 0],
+    [-0.71, 0.68, 0],
+    [0.05, 0.68, 0],
+    [0.05, 0.02, 0]
 ])
-vol.bounding_polygon = o3d.utility.Vector3dVector(polygon_bounds)
-
-# for lite6-1
-# fmt: off
-# polygon_bounds = o3d.utility.Vector3dVector([
-#     [0.089, -0.4, 0],
-#     [0.26, -0.4, 0],
-#     [0.26, -0.23, 0],
-#     [0.089, -0.23, 0]
-# ])
-# vol.bounding_polygon = o3d.utility.Vector3dVector(polygon_bounds)
-# fmt: on
+vol.bounding_polygon = polygon_bounds
 
 crop_robot = vol.crop_point_cloud(splat_pcd)
 o3d.visualization.draw_plotly([crop_robot])
-# o3d.visualization.draw_plotly([crop_robot, robot_pcd])
+
+# %%
+o3d.visualization.draw_plotly([crop_robot, robot_pcd])
 
 
 # %%
@@ -173,14 +223,15 @@ np.save(output_dir + "/polygon_bounds.npy", polygon_bounds)
 logging.info(f"Saved cropping polygon_bounds to {output_dir + '/polygon_bounds.npy'}")
 logging.warning("Using existing bounding polygon guess. Modify if needed.")
 
+
 # %%
 center_crop_robot = crop_robot.get_center()
 center_robot_pcd = robot_pcd.get_center()
 translate_robot_pcd_to_crop = center_crop_robot - center_robot_pcd
-R = robot_pcd.get_rotation_matrix_from_xyz((0, 0, -np.pi / 2))
-threshold = 0.2
+R = robot_pcd.get_rotation_matrix_from_xyz((0, 0, 0))
+threshold = 1e-1
 trans_init = np.eye(4)
-scale_init = 1
+scale_init = 1.0
 trans_init[:3, :3] = scale_init * R
 adjusted_offset = np.array([0, 0, 0])
 trans_init[:3, 3] = translate_robot_pcd_to_crop + adjusted_offset
@@ -197,6 +248,9 @@ np.save(output_dir + "/trans_init.npy", trans_init)
 
 estimation_method = o3d.pipelines.registration.TransformationEstimationPointToPoint()
 estimation_method.with_scaling = True
+converge_criteria = o3d.pipelines.registration.ICPConvergenceCriteria(
+    max_iteration=500, relative_fitness=1e-6, relative_rmse=1e-6
+)
 
 reg_p2p = o3d.pipelines.registration.registration_icp(
     source=robot_pcd,
@@ -204,6 +258,7 @@ reg_p2p = o3d.pipelines.registration.registration_icp(
     max_correspondence_distance=threshold,
     init=trans_init,
     estimation_method=estimation_method,
+    criteria=converge_criteria,
 )
 
 # Get the transformation matrix
@@ -238,7 +293,7 @@ for tmesh in temp_meshes:
     scene.add_triangles(tmesh_t)
     occupancy = scene.compute_occupancy(t_points)
     distances = scene.compute_distance(t_points)
-    link_mask = (occupancy.numpy() > 0.5) | (distances.numpy() < 0.007)
+    link_mask = (occupancy.numpy() > 0.5) | (distances.numpy() < 0.009)
     link_masks_local.append(link_mask)
 
 colored_points = np.zeros((points.shape[0], 3))
