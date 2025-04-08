@@ -4,8 +4,9 @@ import pygame
 from pathlib import Path
 from sim_a_splat.env.pusht.pusht_keypoints_env import PushTKeypointsEnv
 
-# from sim_a_splat.env.splat.splat_env import SplatEnv
-from sim_a_splat.env.scara.scara_env import ScaraSimEnv
+from sim_a_splat.env.splat.splat_scara_env import SplatEnv
+
+# from sim_a_splat.env.scara.scara_env import ScaraSimEnv
 
 
 @click.command()
@@ -22,26 +23,17 @@ def main(render_size, control_hz):
     )
     package_name = "scara/"
     urdf_name = "scara.urdf"
-    eef_link_name = ""
+    eef_link_name = "gripper"
 
     # connect to the drake env
-    drake_instance = ScaraSimEnv(
-        env_objects=True,
-        visualise_flag=True,
+    splat_env = SplatEnv(
+        visualise_sim_flag=True,
         eef_link_name=eef_link_name,
         package_path=package_path,
         package_name=package_name,
         urdf_name=urdf_name,
     )
-    drake_instance.load_model()
-
-    # splat_env = SplatEnv(
-    #     visualise_sim_flag=True,
-    #     eef_link_name=eef_link_name,
-    #     package_path=package_path,
-    #     package_name=package_name,
-    #     urdf_name=urdf_name,
-    # )
+    splat_env.load_model()
 
     def map_actions(act: np.ndarray):
         if act is None:
@@ -59,7 +51,7 @@ def main(render_size, control_hz):
         block_pos = np.array(list(map_actions(tblock_pos[:2])) + [tblock_pos[2]])
         goal_pose = np.array(list(map_actions(goal_pose[:2])) + [goal_pose[2]])
         reset_pose = [eef_pos, block_pos, goal_pose]
-        _ = drake_instance.reset(reset_pose)
+        _ = splat_env.reset(reset_pose)
 
         retry = False
         pause = False
@@ -88,14 +80,14 @@ def main(render_size, control_hz):
                 continue
 
             act = agent.act(obs)
-            dact = drake_instance._get_action()
+            dact = splat_env._get_action()
             print(f"act: {act}, dact: {dact}")
             _, _, _, _ = env.step(act)
             _ = env.render(mode="human")
 
             if act is not None:
                 eef_action = map_actions(act)
-                _, _, sdone, _ = drake_instance.step(eef_action)
+                _, _, sdone, _ = splat_env.step(eef_action)
 
             clock.tick(control_hz)
 

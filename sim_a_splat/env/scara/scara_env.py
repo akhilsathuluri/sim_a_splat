@@ -20,6 +20,7 @@ from pydrake.all import (
     StartMeshcat,
     AddDefaultVisualization,
     Rgba,
+    FixedOffsetFrame,
     Cylinder,
 )
 import open3d as o3d
@@ -68,48 +69,74 @@ class ScaraSimEnv(BaseRobotEnv):
 
     def load_model(self):
         builder = DiagramBuilder()
-        plant, scene_graph = AddMultibodyPlantSceneGraph(
+        self.plant, scene_graph = AddMultibodyPlantSceneGraph(
             builder, time_step=self.time_step
         )
         self.scene_graph = scene_graph
         if self.env_objects_flag:
-            _ = add_env_objects(plant, scene_graph)
+            _ = add_env_objects(self.plant, scene_graph)
         self.robot_model_instance, self.uid = AddRobotModel(
-            plant=plant,
+            plant=self.plant,
             scene_graph=scene_graph,
             package_path=self.package_path,
             package_name=self.package_name,
             urdf_name=self.urdf_name,
-            weld_frame_transform=RigidTransform(),
+            weld_frame_transform=RigidTransform(
+                # np.array([0.434320411787011, -1.31922887815084, 0.644967241561405])
+                np.array([0.0, 0.0, 0.0]),
+            ),
         )
         # TODO: Modify API to enable loading the same robot multiple times
         # self.eef_link_name = self.eef_link_name + "_" + str(self.uid)
         # self.eef_link_name = self.eef_link_name
         # assumes robot model to be a 6DoF robot arm with fixed base in urdf
         # TODO: Create API to easily make wrappers around anytype of robot and with an inverse dynamics controller
-        plant.set_contact_model(ContactModel.kHydroelasticsOnly)
-        add_ground_with_friction(plant)
-        if self.eef_link_name != "":
-            add_soft_collisions(plant, eef_link_name=self.eef_link_name)
-        plant.set_penetration_allowance(1e-5)
-        collision_filter_manager = scene_graph.collision_filter_manager()
-        collision_filter_manager.Apply(
-            CollisionFilterDeclaration().ExcludeBetween(
-                GeometrySet(
-                    plant.GetCollisionGeometriesForBody(
-                        plant.GetBodyByName(
-                            self.eef_link_name,
-                            self.robot_model_instance,
-                        )
-                    )
-                ),
-                GeometrySet(plant.GetCollisionGeometriesForBody(plant.world_body())),
+        self.plant.set_contact_model(ContactModel.kHydroelasticsOnly)
+        self.plant.set_penetration_allowance(1e-4)
+        add_ground_with_friction(self.plant)
+        if self.eef_link_name == "":
+            logging.warning("Set the end effector body here")
+            eef_base_link = self.plant.GetBodyByName(
+                "gripper", self.robot_model_instance
             )
-        )
-        plant.Finalize()
-        self.nq = plant.num_positions(self.robot_model_instance)
-        self.end_effector_body = plant.GetBodyByName(self.eef_link_name)
-        self.end_effector_frame = self.end_effector_body.body_frame()
+
+            self.eef_link_name = "gripper_center"
+            self.end_effector_frame = self.plant.AddFrame(
+                FixedOffsetFrame(
+                    name="gripper_center",
+                    P=eef_base_link.body_frame(),
+                    X_PF=RigidTransform(RotationMatrix(), np.array([0.0, 0.0, 0.0])),
+                    model_instance=self.robot_model_instance,
+                ),
+            )
+            self.plant.RegisterVisualGeometry(
+                eef_base_link,
+                RigidTransform(),
+                Cylinder(radius=0.01, length=0.1),
+                "gripper_visual",
+                np.array([1.0, 1.0, 1.0, 1.0]),
+            )
+        else:
+            add_soft_collisions(self.plant, eef_link_name=self.eef_link_name)
+            self.end_effector_body = self.plant.GetBodyByName(self.eef_link_name)
+            self.end_effector_frame = self.end_effector_body.body_frame()
+
+        # collision_filter_manager = scene_graph.collision_filter_manager()
+        # collision_filter_manager.Apply(
+        #     CollisionFilterDeclaration().ExcludeBetween(
+        #         GeometrySet(
+        #             plant.GetCollisionGeometriesForBody(
+        #                 plant.GetBodyByName(
+        #                     self.eef_link_name,
+        #                     self.robot_model_instance,
+        #                 )
+        #             )
+        #         ),
+        #         GeometrySet(plant.GetCollisionGeometriesForBody(plant.world_body())),
+        #     )
+        # )
+        self.plant.Finalize()
+        self.nq = self.plant.num_positions(self.robot_model_instance)
         station = builder.AddSystem(
             MakeHardwareStation(
                 self.time_step,
@@ -120,15 +147,19 @@ class ScaraSimEnv(BaseRobotEnv):
                 uid=self.uid,
             )
         )
-        pose2config = builder.AddSystem(PoseToConfig(plant, self.end_effector_frame))
+        pose2config = builder.AddSystem(
+            PoseToConfig(self.plant, self.end_effector_frame, relax_ori=True)
+        )
         builder.Connect(
-            plant.get_state_output_port(self.robot_model_instance),
+            self.plant.get_state_output_port(self.robot_model_instance),
             station.GetInputPort("robot_estimated_state"),
         )
-        builder.ExportOutput(plant.get_state_output_port(), "system_state_output_port")
+        builder.ExportOutput(
+            self.plant.get_state_output_port(), "system_state_output_port"
+        )
         builder.Connect(
             station.GetOutputPort("robot_torque_commanded"),
-            plant.get_actuation_input_port(self.robot_model_instance),
+            self.plant.get_actuation_input_port(self.robot_model_instance),
         )
         builder.Connect(
             pose2config.get_output_port(), station.GetInputPort("robot_state_desired")
@@ -140,7 +171,6 @@ class ScaraSimEnv(BaseRobotEnv):
         if self.visualize_robot_flag:
             AddDefaultVisualization(builder=builder, meshcat=self.meshcat)
 
-        self.plant = plant
         self.diagram = builder.Build()
         self.simulator = Simulator(self.diagram)
         self.pose_input_port = self.simulator.get_system().GetInputPort("desired_pose")
@@ -172,7 +202,7 @@ class ScaraSimEnv(BaseRobotEnv):
             ]
         self.pose_input_port.FixValue(
             self.diagram_context,
-            RigidTransform(RollPitchYaw(3.14, 0, 0), reset_to_state[0]),
+            RigidTransform(RollPitchYaw(0, 0, 0), reset_to_state[0]),
         )
         reset_to_state[1][2] = 0
         block_pose = np.hstack(
@@ -262,9 +292,7 @@ class ScaraSimEnv(BaseRobotEnv):
             self.lcm.Publish("DRAKE_VIEWER_DRAW", msg.encode())
 
     def step(self, action, no_obs=False):
-        self.pose_input_port.FixValue(
-            self.diagram_context, RigidTransform(RollPitchYaw(3.14, 0, 0), action)
-        )
+        self.pose_input_port.FixValue(self.diagram_context, RigidTransform(action))
         try:
             self.simulator.AdvanceTo(self.simulator_context.get_time() + self.time_step)
         except RuntimeError as e:
@@ -293,13 +321,16 @@ class ScaraSimEnv(BaseRobotEnv):
         return observation, reward, done, info
 
     def _get_obs(self):
-        eef_pose = self.plant.EvalBodyPoseInWorld(
-            self.plant_context, self.end_effector_body
+        eef_pose = self.plant.CalcRelativeTransform(
+            self.plant_context,
+            self.plant.world_frame(),
+            self.end_effector_frame,
         )
+
         eef_pos = eef_pose.translation()
         eef_quat = eef_pose.rotation().ToQuaternion().wxyz()
-        eef_vel = self.plant.EvalBodySpatialVelocityInWorld(
-            self.plant_context, self.end_effector_body
+        eef_vel = self.end_effector_frame.CalcRelativeSpatialVelocityInWorld(
+            self.plant_context, self.plant.world_frame()
         )
         return (
             eef_pos,
@@ -326,13 +357,15 @@ class ScaraSimEnv(BaseRobotEnv):
         block_pose = block_state[:7]
         block_vel = block_state[7:]
 
-        eef_pose = self.plant.EvalBodyPoseInWorld(
-            self.plant_context, self.end_effector_body
+        eef_pose = self.plant.CalcRelativeTransform(
+            self.plant_context,
+            self.plant.world_frame(),
+            self.end_effector_frame,
         )
         eef_pos = eef_pose.translation()
         eef_quat = eef_pose.rotation().ToQuaternion().wxyz()
-        eef_vel = self.plant.EvalBodySpatialVelocityInWorld(
-            self.plant_context, self.end_effector_body
+        eef_vel = self.end_effector_frame.CalcRelativeSpatialVelocityInWorld(
+            self.plant_context, self.plant.world_frame()
         )
         info = {
             "robot_pos": robot_pos,

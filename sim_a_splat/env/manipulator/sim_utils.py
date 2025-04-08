@@ -29,16 +29,17 @@ import logging
 
 
 class PoseToConfig(LeafSystem):
-    def __init__(self, plant: MultibodyPlant, frame: Frame):
+    def __init__(self, plant: MultibodyPlant, frame: Frame, relax_ori=False):
         LeafSystem.__init__(self)
         self.plant = plant
         self.frame = frame
+        self.relax_ori = relax_ori
         self.plant_context = plant.CreateDefaultContext()
         self.DeclareAbstractInputPort(
             "pose",
             AbstractValue.Make(RigidTransform()),
         )
-        self.out_port_len = 6
+        self.out_port_len = plant.num_actuators()
         self.DeclareVectorOutputPort(
             "config",
             self.out_port_len,
@@ -55,13 +56,14 @@ class PoseToConfig(LeafSystem):
             p_AQ_lower=desired_pose.translation() - 1e-4,
             p_AQ_upper=desired_pose.translation() + 1e-4,
         )
-        ik.AddOrientationConstraint(
-            frameAbar=self.frame,
-            R_AbarA=desired_pose.rotation(),
-            frameBbar=self.plant.world_frame(),
-            R_BbarB=RotationMatrix(),
-            theta_bound=1e-3,
-        )
+        if not self.relax_ori:
+            ik.AddOrientationConstraint(
+                frameAbar=self.frame,
+                R_AbarA=desired_pose.rotation(),
+                frameBbar=self.plant.world_frame(),
+                R_BbarB=RotationMatrix(),
+                theta_bound=1e-3,
+            )
         prog = ik.prog()
         result = Solve(prog)
         q_desired = result.GetSolution(ik.q())
@@ -130,23 +132,28 @@ def AddRobotModel(
     else:
         parser = Parser(plant)
     urdf_utils = URDFutils(package_path, package_name, urdf_name)
-    urdf_utils.modify_meshes()
+    urdf_utils.modify_meshes(in_mesh_format=".STL")
     logging.warning("removing collision tags!")
     urdf_utils.remove_collisions_except([])
     # unique_id = urdf_utils.make_model_unique()
     unique_id = ""
+    urdf_utils.add_joint_limits()
+    urdf_utils.fix_joints_except(["shoulder", "elbow"])
     urdf_utils.add_actuation_tags()
+
     _, temp_urdf = urdf_utils.get_modified_urdf()
+    # urdf_utils.show_temp_urdf(temp_urdf)
     abs_path = Path(package_path).resolve().__str__()
     parser.package_map().Add(package_name.split("/")[0], abs_path + "/" + package_name)
     robot_model = parser.AddModels(temp_urdf.name)[0]
 
-    # if weld_frame_transform is not None:
-    #     weld_frame = plant.WeldFrames(
-    #         plant.get_body(plant.GetBodyIndices(robot_model)[0]).body_frame(),
-    #         plant.world_frame(),
-    #         weld_frame_transform,
-    #     )
+    if weld_frame_transform is not None:
+        print("Welding robot to world frame with transform: ", weld_frame_transform)
+        plant.WeldFrames(
+            plant.get_body(plant.GetBodyIndices(robot_model)[0]).body_frame(),
+            plant.world_frame(),
+            weld_frame_transform,
+        )
 
     return robot_model, unique_id
 

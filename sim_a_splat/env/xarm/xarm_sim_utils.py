@@ -21,11 +21,14 @@ from pydrake.all import (
     Frame,
     SpatialInertia,
     UnitInertia,
+    Box,
+    Rgba,
 )
 import numpy as np
 from sak.URDFutils import URDFutils
 from pathlib import Path
 import logging
+import uuid
 
 
 class PoseToConfig(LeafSystem):
@@ -66,25 +69,21 @@ class PoseToConfig(LeafSystem):
         result = Solve(prog)
         q_desired = result.GetSolution(ik.q())
 
-        # when free block
-        # output.set_value(q_desired[:6])
         output.set_value(q_desired[: self.out_port_len])
 
 
 def add_ground_with_friction(plant):
-    dissipation = 5e2
-    slab_thickness = 5.0
-    hydroelastic_modulus = 5e6
-
     proximity_properties_ground = ProximityProperties()
     AddContactMaterial(
-        dissipation=dissipation,
+        dissipation=5e0,
         friction=CoulombFriction(static_friction=1.0, dynamic_friction=1.0),
         properties=proximity_properties_ground,
     )
     # taken from: https://github.com/vincekurtz/drake_ddp/blob/b4b22a55448121153f992cae453236f7f5891b23/panda_fr3.py#L79
     AddCompliantHydroelasticPropertiesForHalfSpace(
-        slab_thickness, hydroelastic_modulus, proximity_properties_ground
+        slab_thickness=1e0,
+        hydroelastic_modulus=1e8,
+        properties=proximity_properties_ground,
     )
 
     plant.RegisterCollisionGeometry(
@@ -96,25 +95,62 @@ def add_ground_with_friction(plant):
     )
 
 
-def add_soft_collisions(plant, eef_link_name):
-    dissipation = 1e4
-    point_stiffness = 1e7
-    surface_friction_feet = CoulombFriction(static_friction=0, dynamic_friction=0)
+def add_soft_collisions(
+    plant,
+    eef_link_name,
+    body=Cylinder(radius=0.013, length=0.05),
+    offset=RigidTransform(np.array([0.0, 0, 0.0])),
+):
     proximity_properties_feet = ProximityProperties()
     AddContactMaterial(
-        dissipation, point_stiffness, surface_friction_feet, proximity_properties_feet
+        dissipation=1e0,
+        friction=CoulombFriction(static_friction=1.5, dynamic_friction=1.2),
+        properties=proximity_properties_feet,
     )
-    AddCompliantHydroelasticProperties(0.05, 5e6, proximity_properties_feet)
-
-    radius, length = 0.013, 0.05
-    offset = np.array([0.0, 0, 0.19])
+    AddCompliantHydroelasticProperties(
+        resolution_hint=5e-3,
+        hydroelastic_modulus=5e6,
+        properties=proximity_properties_feet,
+    )
     plant.RegisterCollisionGeometry(
         plant.GetBodyByName(eef_link_name),
         RigidTransform(offset),
-        Cylinder(radius=radius, length=length),
+        body,
         eef_link_name + "_collision",
         proximity_properties_feet,
     )
+
+
+# def add_cube(plant, name, color, initial_position, cube_size=0.05):
+#     density = 1040  # kg/m^3 -- ABS
+#     inertia = SpatialInertia.SolidCubeWithDensity(density, cube_size)
+#     body = plant.AddRigidBody(name, inertia)
+#     plant.RegisterVisualGeometry(
+#         body=body,
+#         X_BG=RigidTransform(),
+#         shape=Box(cube_size, cube_size, cube_size),
+#         name=name + "_vis",
+#         diffuse_color=color,
+#     )
+#     proximity_properties = ProximityProperties()
+#     AddContactMaterial(
+#         dissipation=5.3e0,
+#         friction=CoulombFriction(static_friction=1.0, dynamic_friction=1.0),
+#         properties=proximity_properties,
+#     )
+#     AddCompliantHydroelasticProperties(
+#         resolution_hint=5e-3, hydroelastic_modulus=1e8, properties=proximity_properties
+#     )
+#     plant.RegisterCollisionGeometry(
+#         body=body,
+#         X_BG=RigidTransform(),
+#         shape=Box(cube_size, cube_size, cube_size),
+#         name=name + "_col",
+#         properties=proximity_properties,
+#     )
+#     X_WB = RigidTransform(RotationMatrix(), initial_position)
+#     plant.SetDefaultFreeBodyPose(body, X_WB)
+#     return body
 
 
 def AddRobotModel(
@@ -140,29 +176,36 @@ def AddRobotModel(
     abs_path = Path(package_path).resolve().__str__()
     parser.package_map().Add(package_name.split("/")[0], abs_path + "/" + package_name)
     robot_model = parser.AddModels(temp_urdf.name)[0]
-
-    # if weld_frame_transform is not None:
-    #     weld_frame = plant.WeldFrames(
-    #         plant.get_body(plant.GetBodyIndices(robot_model)[0]).body_frame(),
-    #         plant.world_frame(),
-    #         weld_frame_transform,
-    #     )
-
     return robot_model, unique_id
 
 
-def add_env_objects(plant, scene_graph):
-    parser = Parser(plant, scene_graph)
+def add_env_objects(
+    plant, scene_graph, object_path=None, init_pose=RigidTransform(), prefix=""
+):
+    # object_path = "assets/tblock_paper/tblock_paper.sdf"
+    parser = Parser(plant=plant, scene_graph=scene_graph, model_name_prefix=f"{prefix}")
     urdf_path = (
-        (
-            Path(__file__).resolve().parent.parent.parent.parent
-            / "assets/tblock_paper/tblock_paper.sdf"
-        )
+        (Path(__file__).resolve().parent.parent.parent.parent / object_path)
         .resolve()
         .__str__()
     )
-    tblock = parser.AddModels(urdf_path)[0]
-    return tblock
+    brick = parser.AddModels(urdf_path)[0]
+    plant.SetDefaultFreeBodyPose(plant.GetBodyByName("base_link", brick), init_pose)
+    return brick
+
+
+# def add_env_objects(plant, scene_graph):
+#     parser = Parser(plant, scene_graph)
+#     urdf_path = (
+#         (
+#             Path(__file__).resolve().parent.parent.parent.parent
+#             / "assets/tblock_paper/tblock_paper.sdf"
+#         )
+#         .resolve()
+#         .__str__()
+#     )
+#     tblock = parser.AddModels(urdf_path)[0]
+#     return tblock
 
 
 def MakeHardwareStation(
@@ -190,16 +233,15 @@ def MakeHardwareStation(
     robot_controller = builder.AddSystem(
         InverseDynamicsController(
             controller_plant,
-            kp=[400.0] * control_plant_pos,
-            ki=[0.0] * control_plant_pos,
-            kd=[40.0] * control_plant_pos,
+            kp=[100.0] * (control_plant_pos - 2) + [20.0] * 2,
+            ki=[0.0] * (control_plant_pos - 2) + [0.0] * 2,
+            kd=[20.0] * (control_plant_pos - 2) + [5.0] * 2,
             has_reference_acceleration=False,
         )
     )
     builder.ExportInput(
         robot_controller.get_input_port_estimated_state(), "robot_estimated_state"
     )
-    # builder.ExportOutput(robot_controller.get_output_port(), "robot_torque_commanded")
     builder.ExportOutput(
         robot_controller.GetOutputPort("actuation"), "robot_torque_commanded"
     )

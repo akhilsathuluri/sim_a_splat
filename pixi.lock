@@ -411,7 +411,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/db/7e/da7b57a1f3af7303a0f3c8594d820fc0d3a9bbe3810a357eb21eb166e76b/jaxtyping-0.2.38-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/91/29/df4b9b42f2be0b623cbd5e2140cafcaa2bef0759a00b7b70104dcfe2fb51/joblib-1.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/83/60/d497a310bde3f01cb805196ac61b7ad6dc5dcf8dce66634dc34364b20b4f/lazy_loader-0.4-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/2b/de/0fb4db5324875e86143a8fc43319d045651e1628075508ed78a029e235a6/lcm-1.5.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/50/8d/da77ceb92ed674da93959184a2777d08ccbd872559fb52aba16b91686b7e/lightning_utilities-0.12.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/3f/08/83871f3c50fc983b88547c196d11cf8c3340e37c32d2e9d6152abe2c61f7/Markdown-3.7-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/60/60/60afad3bdd7d828c383e97efe2d774ebad8f41180f13b307ff895f2cb5e9/mediapy-1.2.2-py3-none-any.whl
@@ -462,7 +461,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/bd/c8/1eb0fea11fe5cd84c78a9fffbdcad101f974734fbd23b0200ad9ef5ea23e/rawpy-0.24.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/3f/51/d4db610ef29373b879047326cbf6fa98b6c1969d6f6dc423279de2b1be2c/requests_toolbelt-1.0.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8f/04/9e36f28be4c0532c0e9207ff9dc01fb13a2b0eb036476a213b0000837d0e/retrying-1.3.4-py3-none-any.whl
-      - pypi: git+https://github.com/akhilsathuluri/sak.git#4e25a5717be990ea79d6f2faea48dc26c66ecbb1
       - pypi: https://files.pythonhosted.org/packages/96/08/916e7d9ee4721031b2f625db54b11d8379bd51707afaa3e5a29aecf10bc4/scikit_image-0.25.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/b7/91/ab3c697188f224d658969f678be86b0968ccc52774c8ab4a86a07be13c25/scikit_learn-1.6.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/6a/23/8146aad7d88f4fcb3a6218f41a60f6c2d4e3a72de72da1825dc7c8f7877c/semantic_version-2.10.0-py2.py3-none-any.whl
@@ -503,6 +501,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/9a/24/93ce54550a9dd3fd996ed477f00221f215bf6da3580397fbc138d6036e2e/wurlitzer-3.1.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/29/ee/086c7cb4f067238e55fd645188232d67afe1ac6adacbea7a8cf2c6346cd8/xatlas-0.0.9-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/70/52/78858a082725302b3685589d6d85207e6306166d1895833f5c13f3ee852a/yourdfpy-0.0.57-py3-none-any.whl
+      - pypi: ../sak
 packages:
 - conda: https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
   sha256: fe51de6107f9edc7aa4f786a70f4a883943bc9d39b3bb7307c04c41410990726
@@ -2558,13 +2557,6 @@ packages:
   - pre-commit==3.7.0 ; extra == 'lint'
   - pytest>=7.4 ; extra == 'test'
   - pytest-cov>=4.1 ; extra == 'test'
-  requires_python: '>=3.7'
-- pypi: https://files.pythonhosted.org/packages/2b/de/0fb4db5324875e86143a8fc43319d045651e1628075508ed78a029e235a6/lcm-1.5.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-  name: lcm
-  version: 1.5.1
-  sha256: 8247f4c6d2f453c15f216bf607302a26fc27d5d94054e07a76d1787d451a3fed
-  requires_dist:
-  - pytest ; extra == 'test'
   requires_python: '>=3.7'
 - conda: https://conda.anaconda.org/conda-forge/linux-64/lcms2-2.17-h717163a_0.conda
   sha256: d6a61830a354da022eae93fa896d0991385a875c6bba53c82263a289deda9db8
@@ -5748,10 +5740,12 @@ packages:
   - pkg:pypi/rpds-py?source=hash-mapping
   size: 391615
   timestamp: 1740153211261
-- pypi: git+https://github.com/akhilsathuluri/sak.git#4e25a5717be990ea79d6f2faea48dc26c66ecbb1
+- pypi: ../sak
   name: sak
   version: 0.1.0
+  sha256: 465ee4498687ddac5776bf85c768a59f4fedb4661b183c005352d7d950e6e89a
   requires_python: '>=3.7'
+  editable: true
 - pypi: https://files.pythonhosted.org/packages/96/08/916e7d9ee4721031b2f625db54b11d8379bd51707afaa3e5a29aecf10bc4/scikit_image-0.25.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
   name: scikit-image
   version: 0.25.2

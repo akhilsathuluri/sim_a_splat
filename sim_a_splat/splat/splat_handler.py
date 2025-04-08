@@ -50,7 +50,7 @@ class SplatHandler:
             self._setup_scene_splat(full_scene=False)
 
         self.rbt_idx, self.blk_idx = 3, 2
-        self.rbt_drake_namespace = "plant::xarm6_with_gripper::"
+        self.rbt_drake_namespace = "plant::scara::"
         self.blk_drake_namespace = "plant::tblock_paper::"
 
     def _load_saved_masks(self):
@@ -139,14 +139,13 @@ class SplatHandler:
     def _add_robot_meshes(self, robot_mesh_dir=None, urdf_name=None):
         robot_model = self.instance_uid.split("-")[0]
         urdf_location = (
-            robot_mesh_dir
-            + f"/robot_description/xarm_description/{robot_model}/urdf/{urdf_name}"
+            robot_mesh_dir + f"/robot_description/{robot_model}/urdf/{urdf_name}"
         )
         with open(urdf_location, "r") as file:
             urdf_content = file.read()
         urdf_content = urdf_content.replace(
             "package://",
-            f"{robot_mesh_dir}/robot_description/xarm_description/",
+            f"{robot_mesh_dir}/robot_description/",
         )
         with tempfile.NamedTemporaryFile(delete=False, suffix=".urdf") as tmp_urdf_file:
             tmp_urdf_file.write(urdf_content.encode())

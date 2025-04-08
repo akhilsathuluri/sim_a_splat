@@ -6,6 +6,7 @@ platforms = ["linux-64"]
 version = "0.1.0"
 
 [tasks]
+post_install = "pip install viser==0.2.23"
 
 [dependencies]
 python = "3.10.*"
@@ -28,11 +29,9 @@ torch = "==2.4.1"
 torchvision = "==0.19.1"
 torchaudio = "==2.4.1"
 nerfstudio = ">=1.1.5, <2"
-sak = { git = "git+https://github.com/akhilsathuluri/sak.git" }
 amo-urdf = { git = "git+https://github.com/ami-iit/amo_urdf.git" }
-lcm = ">=1.5.1, <2"
+sak = { path = "../sak", editable = true}
 drake = ">=1.38.0, <2"
-viser = ">=0.2.7, <0.3"
 open3d = ">=0.19.0, <0.20"
 
 [system-requirements]
