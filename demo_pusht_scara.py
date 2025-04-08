@@ -89,7 +89,7 @@ def main(render_size, control_hz):
 
             act = agent.act(obs)
             dact = drake_instance._get_action()
-            print(f"act: {act}, dact: {dact}")
+            # print(f"act: {act}, dact: {dact}")
             _, _, _, _ = env.step(act)
             _ = env.render(mode="human")
 

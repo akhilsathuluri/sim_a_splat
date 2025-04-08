@@ -97,9 +97,9 @@ def add_ground_with_friction(plant):
 
 def add_soft_collisions(
     plant,
-    eef_link_name,
+    link_name,
     body=Cylinder(radius=0.013, length=0.05),
-    offset=RigidTransform(np.array([0.0, 0, 0.0])),
+    collision_pose=RigidTransform(np.array([0.0, 0, 0.0])),
 ):
     proximity_properties_feet = ProximityProperties()
     AddContactMaterial(
@@ -113,10 +113,10 @@ def add_soft_collisions(
         properties=proximity_properties_feet,
     )
     plant.RegisterCollisionGeometry(
-        plant.GetBodyByName(eef_link_name),
-        RigidTransform(offset),
+        plant.GetBodyByName(link_name),
+        collision_pose,
         body,
-        eef_link_name + "_collision",
+        link_name + "_collision",
         proximity_properties_feet,
     )
 

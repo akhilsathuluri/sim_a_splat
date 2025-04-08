@@ -22,6 +22,7 @@ from pydrake.all import (
     Rgba,
     FixedOffsetFrame,
     Cylinder,
+    Box,
 )
 import open3d as o3d
 from drake import (
@@ -74,7 +75,7 @@ class ScaraSimEnv(BaseRobotEnv):
         )
         self.scene_graph = scene_graph
         if self.env_objects_flag:
-            _ = add_env_objects(self.plant, scene_graph, mesh_scale=0.5)
+            _ = add_env_objects(self.plant, scene_graph)
         self.robot_model_instance, self.uid = AddRobotModel(
             plant=self.plant,
             scene_graph=scene_graph,
@@ -83,7 +84,7 @@ class ScaraSimEnv(BaseRobotEnv):
             urdf_name=self.urdf_name,
             weld_frame_transform=RigidTransform(
                 # np.array([0.434320411787011, -1.31922887815084, 0.644967241561405])
-                np.array([0.0, 0.0, 0.05]),
+                np.array([0.0, 0.0, 0.0]),
             ),
         )
         # TODO: Modify API to enable loading the same robot multiple times
@@ -93,7 +94,16 @@ class ScaraSimEnv(BaseRobotEnv):
         # TODO: Create API to easily make wrappers around anytype of robot and with an inverse dynamics controller
         self.plant.set_contact_model(ContactModel.kHydroelasticsOnly)
         self.plant.set_penetration_allowance(1e-4)
-        add_ground_with_friction(self.plant)
+        # add_ground_with_friction(self.plant)
+        box_coll_id = add_soft_collisions(
+            plant=self.plant,
+            link_name="base_link",
+            body=Box(0.6, 0.5, 0.05),
+            collision_pose=RigidTransform(
+                # RotationMatrix(RollPitchYaw(0.0, np.pi / 2, 0.0)),
+                np.array([0.1, 0.0, 0.0125]),
+            ),
+        )
         if self.eef_link_name == "":
             logging.warning("Set the end effector body here")
             eef_base_link = self.plant.GetBodyByName(
@@ -117,10 +127,15 @@ class ScaraSimEnv(BaseRobotEnv):
                 np.array([1.0, 1.0, 1.0, 1.0]),
             )
         else:
-            add_soft_collisions(self.plant, eef_link_name=self.eef_link_name)
+            add_soft_collisions(
+                self.plant,
+                link_name=self.eef_link_name,
+                body=Cylinder(radius=0.008, length=0.045),
+            )
             self.end_effector_body = self.plant.GetBodyByName(self.eef_link_name)
             self.end_effector_frame = self.end_effector_body.body_frame()
 
+        # breakpoint()
         collision_filter_manager = scene_graph.collision_filter_manager()
         collision_filter_manager.Apply(
             CollisionFilterDeclaration().ExcludeBetween(
@@ -133,7 +148,10 @@ class ScaraSimEnv(BaseRobotEnv):
                     )
                 ),
                 GeometrySet(
-                    self.plant.GetCollisionGeometriesForBody(self.plant.world_body())
+                    # self.plant.GetCollisionGeometriesForBody(
+                    #     self.plant.GetBodyByName("base_link_collision")
+                    # )
+                    box_coll_id
                 ),
             )
         )
@@ -194,7 +212,7 @@ class ScaraSimEnv(BaseRobotEnv):
         if reset_to_state is None:
             reset_to_state = [
                 self.np_random.uniform(
-                    low=np.array([0.25, -0.3, 0.2]), high=np.array([0.65, 0.3, 0.2])
+                    low=np.array([0.25, -0.3, 0.1]), high=np.array([0.65, 0.3, 0.1])
                 ),
                 self.np_random.uniform(
                     low=np.array([0.4, -0.183, 0.4, -np.pi]),
@@ -206,7 +224,7 @@ class ScaraSimEnv(BaseRobotEnv):
             self.diagram_context,
             RigidTransform(RollPitchYaw(0, 0, 0), reset_to_state[0]),
         )
-        reset_to_state[1][2] = 0
+        reset_to_state[1][2] = 0.04
         block_pose = np.hstack(
             (
                 RotationMatrix(RollPitchYaw(0, 0, -reset_to_state[1][3]))
@@ -238,7 +256,7 @@ class ScaraSimEnv(BaseRobotEnv):
             self.robot_model_instance,
             np.zeros(len(jpos)),
         )
-        reset_to_state[2][2] = 0
+        reset_to_state[2][2] = 0.04
         self.goal_pose_transform = RigidTransform(
             RotationMatrix(RollPitchYaw(0, 0, -reset_to_state[2][3])),
             reset_to_state[2][:3],
@@ -305,7 +323,7 @@ class ScaraSimEnv(BaseRobotEnv):
         reward = self._compute_reward(info)
         done = self._is_done(info, reward)
         if done:
-            end_location = np.array([0.25, 0.3, 0.2])
+            end_location = np.array([0.075, 0.0, 0.1])
             self.publish_robot_end_location(end_location=end_location)
             if type(observation) is tuple:
                 eef_goal_dist = np.linalg.norm(observation[0][:2] - end_location[:2])
@@ -353,12 +371,12 @@ class ScaraSimEnv(BaseRobotEnv):
         robot_pos = robot_state[: self.nq]
         robot_vel = robot_state[self.nq :]
 
-        # block_state = self.plant.get_state_output_port(
-        #     self.plant.GetModelInstanceByName("tblock_paper")
-        # ).Eval(self.plant_context)
+        block_state = self.plant.get_state_output_port(
+            self.plant.GetModelInstanceByName("scaled_tblock")
+        ).Eval(self.plant_context)
 
-        # block_pose = block_state[:7]
-        # block_vel = block_state[7:]
+        block_pose = block_state[:7]
+        block_vel = block_state[7:]
 
         eef_pose = self.plant.CalcRelativeTransform(
             self.plant_context,
@@ -373,8 +391,8 @@ class ScaraSimEnv(BaseRobotEnv):
         info = {
             "robot_pos": robot_pos,
             "robot_vel": robot_vel,
-            # "block_pose": block_pose,
-            # "block_vel": block_vel,
+            "block_pose": block_pose,
+            "block_vel": block_vel,
             "eef_pos": eef_pos,
             "eef_quat": eef_quat,
             "eef_vel": eef_vel.translational(),
@@ -384,20 +402,19 @@ class ScaraSimEnv(BaseRobotEnv):
         return info
 
     def _compute_reward(self, info):
-        # goal_pos = self.goal_pose_transform.translation()
-        # block_pos = info["block_pose"][4:]
-        # r1 = -np.linalg.norm(goal_pos - block_pos)
+        goal_pos = self.goal_pose_transform.translation()
+        block_pos = info["block_pose"][4:]
+        r1 = -np.linalg.norm(goal_pos - block_pos)
 
-        # goal_yaw = self.goal_pose_transform.rotation().ToRollPitchYaw().vector()[2]
-        # quat = info["block_pose"][:4]
-        # block_yaw = (
-        #     RotationMatrix(Quaternion(quat / np.linalg.norm(quat)))
-        #     .ToRollPitchYaw()
-        #     .vector()
-        # )[2]
-        # r2 = -np.abs(goal_yaw - block_yaw)
-        # return r1 + r2
-        return 0.0
+        goal_yaw = self.goal_pose_transform.rotation().ToRollPitchYaw().vector()[2]
+        quat = info["block_pose"][:4]
+        block_yaw = (
+            RotationMatrix(Quaternion(quat / np.linalg.norm(quat)))
+            .ToRollPitchYaw()
+            .vector()
+        )[2]
+        r2 = -np.abs(goal_yaw - block_yaw)
+        return r1 + r2
 
     def _is_done(self, info, reward):
         if abs(reward) < 0.02:
@@ -416,17 +433,16 @@ class ScaraSimEnv(BaseRobotEnv):
             np.zeros(len(state["robot_pos"])),
         )
         if self.env_objects_flag:
-            # fully free block
-            # self.plant.SetPositions(
-            #     self.plant_context,
-            #     self.plant.GetModelInstanceByName("tblock_paper"),
-            #     state["block_pose"],
-            # )
-            # self.plant.SetVelocities(
-            #     self.plant_context,
-            #     self.plant.GetModelInstanceByName("tblock_paper"),
-            #     np.zeros(6),
-            # )
+            self.plant.SetPositions(
+                self.plant_context,
+                self.plant.GetModelInstanceByName("scaled_tblock"),
+                state["block_pose"],
+            )
+            self.plant.SetVelocities(
+                self.plant_context,
+                self.plant.GetModelInstanceByName("scaled_tblock"),
+                np.zeros(6),
+            )
             pass
         self.simulator_context.SetTime(state["timestamp"])
 

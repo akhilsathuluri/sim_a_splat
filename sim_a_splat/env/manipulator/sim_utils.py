@@ -105,25 +105,31 @@ def add_ground_with_friction(plant, height=0.0):
     )
 
 
-def add_soft_collisions(plant, eef_link_name, collision_pose=RigidTransform()):
-    dissipation = 1e4
-    point_stiffness = 1e7
-    surface_friction_feet = CoulombFriction(static_friction=0, dynamic_friction=0)
+def add_soft_collisions(
+    plant,
+    link_name,
+    body=Cylinder(radius=0.013, length=0.05),
+    collision_pose=RigidTransform(np.array([0.0, 0, 0.0])),
+):
     proximity_properties_feet = ProximityProperties()
     AddContactMaterial(
-        dissipation, point_stiffness, surface_friction_feet, proximity_properties_feet
+        dissipation=1e0,
+        friction=CoulombFriction(static_friction=1.0, dynamic_friction=0.8),
+        properties=proximity_properties_feet,
     )
-    AddCompliantHydroelasticProperties(0.05, 5e6, proximity_properties_feet)
-
-    radius, length = 0.013, 0.05
-    # offset = np.array([0.0, 0, 0.19])
-    plant.RegisterCollisionGeometry(
-        plant.GetBodyByName(eef_link_name),
+    AddCompliantHydroelasticProperties(
+        resolution_hint=5e-3,
+        hydroelastic_modulus=5e6,
+        properties=proximity_properties_feet,
+    )
+    coll_id = plant.RegisterCollisionGeometry(
+        plant.GetBodyByName(link_name),
         collision_pose,
-        Cylinder(radius=radius, length=length),
-        eef_link_name + "_collision",
+        body,
+        link_name + "_collision",
         proximity_properties_feet,
     )
+    return coll_id
 
 
 def AddRobotModel(

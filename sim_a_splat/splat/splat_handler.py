@@ -51,7 +51,7 @@ class SplatHandler:
 
         self.rbt_idx, self.blk_idx = 3, 2
         self.rbt_drake_namespace = "plant::scara::"
-        self.blk_drake_namespace = "plant::tblock_paper::"
+        self.blk_drake_namespace = "plant::scaled_tblock::"
 
     def _load_saved_masks(self):
         link_masks_dict_path = self.masks_dir + "/link_masks_global_dict.npy"
@@ -192,12 +192,12 @@ class SplatHandler:
     def _add_task_meshes(self, task_mesh_dir=None, mesh_name=None):
         if mesh_name is None:
             tblock_mesh = o3d.io.read_triangle_mesh(
-                task_mesh_dir + "/assets/tblock_paper/tblock_paper.obj"
+                task_mesh_dir + "/assets/tblock_paper/scaled_tblock.obj"
             )
         else:
             tblock_mesh = o3d.io.read_triangle_mesh(task_mesh_dir + mesh_name)
         mesh_color = np.tile(
-            np.array([0.956, 0.396, 0.365]), (len(tblock_mesh.vertices), 1)
+            np.array([76, 160, 224]) / 255, (len(tblock_mesh.vertices), 1)
         )
 
         tblock_mesh_trimesh = trimesh.Trimesh(
@@ -209,7 +209,8 @@ class SplatHandler:
         self.tblock_mesh_frame_handle = self.server.scene.add_mesh_trimesh(
             name=f"{self.instance_uid}/mesh_task/tblock",
             mesh=tblock_mesh_trimesh,
-            scale=self.scale_factor,
+            # scale=self.scale_factor,
+            scale=1.0,
         )
 
     def load_handler(self, msg: lcmt_viewer_load_robot):
