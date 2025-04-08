@@ -87,7 +87,7 @@ def main(render_size, control_hz):
 
             if act is not None:
                 eef_action = map_actions(act)
-                _, _, sdone, _ = splat_env.step(eef_action)
+                _, _, sdone, _ = splat_env.step(eef_action, noobs=True)
 
             clock.tick(control_hz)
 

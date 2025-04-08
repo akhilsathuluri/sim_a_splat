@@ -1,6 +1,7 @@
-<sdf xmlns:ns0="http://drake.mit.edu" version="1.8">
-  <model name="tblock_paper">
-    <link name="tblock_paper">
+<?xml version='1.0'?>
+<sdf xmlns:drake="http://drake.mit.edu" version="1.8">
+  <model name='tblock_paper'>
+    <link name='tblock_paper'>
       <inertial>
         <pose>0.0 -0.042857142857142844 0.0 0 0 0</pose>
         <mass>0.2</mass>
@@ -13,12 +14,12 @@
           <izz>0.003755952380952381</izz>
         </inertia>
       </inertial>
-      <visual name="visual">
+      <visual name='visual'>
         <pose>0.0 0.0 0.0 0 0 0</pose>
         <geometry>
           <mesh>
             <uri>tblock_paper.obj</uri>
-            <scale>0.5 0.5 0.5</scale>
+            <scale>1.0 1.0 1.0</scale>
           </mesh>
         </geometry>
         <material>
@@ -28,20 +29,22 @@
           <emissive>0.0 0.0 0.0 0.0</emissive>
         </material>
       </visual>
-      <collision name="collision">
+      <collision name='collision'>
         <pose>0.0 0.0 0.0 0 0 0</pose>
         <geometry>
           <mesh>
             <uri>tblock_paper.obj</uri>
-            <scale>0.5 0.5 0.5</scale>
+            <scale>1.0 1.0 1.0</scale>
           </mesh>
         </geometry>
-        
-        <ns0:proximity_properties>
-          <ns0:mu_dynamic>1.0</ns0:mu_dynamic>
-          <ns0:mu_static>1.0</ns0:mu_static>
-          <ns0:rigid_hydroelastic />
-        </ns0:proximity_properties>
+        <!-- The proximity properties immediately below enable the hydroelastic
+             contact model for this body. To use point contact instead, delete
+             or comment out the <drake:rigid_hydroelastic> element. -->
+        <drake:proximity_properties>
+          <drake:mu_dynamic>1.0</drake:mu_dynamic>
+          <drake:mu_static>1.0</drake:mu_static>
+          <drake:rigid_hydroelastic/>
+        </drake:proximity_properties>
       </collision>
     </link>
   </model>

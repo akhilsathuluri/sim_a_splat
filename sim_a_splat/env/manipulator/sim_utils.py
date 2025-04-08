@@ -4,6 +4,7 @@ from pydrake.all import (
     RigidTransform,
     RotationMatrix,
     LeafSystem,
+    GeometryInstance,
     AbstractValue,
     Solve,
     InverseKinematics,
@@ -21,11 +22,17 @@ from pydrake.all import (
     Frame,
     SpatialInertia,
     UnitInertia,
+    Mesh,
 )
 import numpy as np
 from sak.URDFutils import URDFutils
 from pathlib import Path
 import logging
+import tempfile
+import xml.etree.ElementTree as ET
+import shutil
+import meshio
+import trimesh
 
 
 class PoseToConfig(LeafSystem):
@@ -73,7 +80,7 @@ class PoseToConfig(LeafSystem):
         output.set_value(q_desired[: self.out_port_len])
 
 
-def add_ground_with_friction(plant):
+def add_ground_with_friction(plant, height=0.0):
     dissipation = 5e2
     slab_thickness = 5.0
     hydroelastic_modulus = 5e6
@@ -91,14 +98,14 @@ def add_ground_with_friction(plant):
 
     plant.RegisterCollisionGeometry(
         plant.world_body(),
-        RigidTransform(),
+        RigidTransform(np.array([0.0, 0.0, height])),
         HalfSpace(),
         "ground_collision",
         proximity_properties_ground,
     )
 
 
-def add_soft_collisions(plant, eef_link_name):
+def add_soft_collisions(plant, eef_link_name, collision_pose=RigidTransform()):
     dissipation = 1e4
     point_stiffness = 1e7
     surface_friction_feet = CoulombFriction(static_friction=0, dynamic_friction=0)
@@ -109,10 +116,10 @@ def add_soft_collisions(plant, eef_link_name):
     AddCompliantHydroelasticProperties(0.05, 5e6, proximity_properties_feet)
 
     radius, length = 0.013, 0.05
-    offset = np.array([0.0, 0, 0.19])
+    # offset = np.array([0.0, 0, 0.19])
     plant.RegisterCollisionGeometry(
         plant.GetBodyByName(eef_link_name),
-        RigidTransform(offset),
+        collision_pose,
         Cylinder(radius=radius, length=length),
         eef_link_name + "_collision",
         proximity_properties_feet,
@@ -157,16 +164,25 @@ def AddRobotModel(
     return robot_model, unique_id
 
 
-def add_env_objects(plant, scene_graph):
+def add_env_objects(plant, scene_graph, mesh_scale=1.0):
     parser = Parser(plant, scene_graph)
     urdf_path = (
         (
             Path(__file__).resolve().parent.parent.parent.parent
-            / "assets/tblock_paper/tblock_paper.sdf"
+            / "assets/tblock_paper/scaled_tblock.sdf"
         )
         .resolve()
         .__str__()
     )
+
+    # mesh = trimesh.load_mesh(urdf_path)
+    # mesh.apply_scale(mesh_scale)
+    # tmp_dir = tempfile.mkdtemp()
+    # scaled_mesh_path = Path(tmp_dir) / "scaled_tblock.obj"
+    # mesh.export(scaled_mesh_path)
+    # then move the mesh and use mesh_to_model from pydrake to get the sdf
+    # https://drake.mit.edu/pydrake/pydrake.multibody.mesh_to_model.html?highlight=convert%20sdf
+
     tblock = parser.AddModels(urdf_path)[0]
     return tblock
 

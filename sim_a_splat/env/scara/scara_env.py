@@ -74,7 +74,7 @@ class ScaraSimEnv(BaseRobotEnv):
         )
         self.scene_graph = scene_graph
         if self.env_objects_flag:
-            _ = add_env_objects(self.plant, scene_graph)
+            _ = add_env_objects(self.plant, scene_graph, mesh_scale=0.5)
         self.robot_model_instance, self.uid = AddRobotModel(
             plant=self.plant,
             scene_graph=scene_graph,
@@ -83,7 +83,7 @@ class ScaraSimEnv(BaseRobotEnv):
             urdf_name=self.urdf_name,
             weld_frame_transform=RigidTransform(
                 # np.array([0.434320411787011, -1.31922887815084, 0.644967241561405])
-                np.array([0.0, 0.0, 0.0]),
+                np.array([0.0, 0.0, 0.05]),
             ),
         )
         # TODO: Modify API to enable loading the same robot multiple times
@@ -93,7 +93,7 @@ class ScaraSimEnv(BaseRobotEnv):
         # TODO: Create API to easily make wrappers around anytype of robot and with an inverse dynamics controller
         self.plant.set_contact_model(ContactModel.kHydroelasticsOnly)
         self.plant.set_penetration_allowance(1e-4)
-        # add_ground_with_friction(self.plant)
+        add_ground_with_friction(self.plant)
         if self.eef_link_name == "":
             logging.warning("Set the end effector body here")
             eef_base_link = self.plant.GetBodyByName(
@@ -121,20 +121,22 @@ class ScaraSimEnv(BaseRobotEnv):
             self.end_effector_body = self.plant.GetBodyByName(self.eef_link_name)
             self.end_effector_frame = self.end_effector_body.body_frame()
 
-        # collision_filter_manager = scene_graph.collision_filter_manager()
-        # collision_filter_manager.Apply(
-        #     CollisionFilterDeclaration().ExcludeBetween(
-        #         GeometrySet(
-        #             plant.GetCollisionGeometriesForBody(
-        #                 plant.GetBodyByName(
-        #                     self.eef_link_name,
-        #                     self.robot_model_instance,
-        #                 )
-        #             )
-        #         ),
-        #         GeometrySet(plant.GetCollisionGeometriesForBody(plant.world_body())),
-        #     )
-        # )
+        collision_filter_manager = scene_graph.collision_filter_manager()
+        collision_filter_manager.Apply(
+            CollisionFilterDeclaration().ExcludeBetween(
+                GeometrySet(
+                    self.plant.GetCollisionGeometriesForBody(
+                        self.plant.GetBodyByName(
+                            self.eef_link_name,
+                            self.robot_model_instance,
+                        )
+                    )
+                ),
+                GeometrySet(
+                    self.plant.GetCollisionGeometriesForBody(self.plant.world_body())
+                ),
+            )
+        )
         self.plant.Finalize()
         self.nq = self.plant.num_positions(self.robot_model_instance)
         station = builder.AddSystem(
@@ -195,10 +197,10 @@ class ScaraSimEnv(BaseRobotEnv):
                     low=np.array([0.25, -0.3, 0.2]), high=np.array([0.65, 0.3, 0.2])
                 ),
                 self.np_random.uniform(
-                    low=np.array([0.4, -0.183, 0.2, -np.pi]),
-                    high=np.array([0.55, 0.183, 0.2, np.pi]),
+                    low=np.array([0.4, -0.183, 0.4, -np.pi]),
+                    high=np.array([0.55, 0.183, 0.4, np.pi]),
                 ),
-                np.array([0.475, 0.0, 0.2, 0.78539816]),
+                np.array([0.475, 0.0, 0.4, 0.78539816]),
             ]
         self.pose_input_port.FixValue(
             self.diagram_context,
@@ -216,14 +218,15 @@ class ScaraSimEnv(BaseRobotEnv):
         if self.env_objects_flag:
             self.plant.SetPositions(
                 self.plant_context,
-                self.plant.GetModelInstanceByName("tblock_paper"),
+                self.plant.GetModelInstanceByName("scaled_tblock"),
                 block_pose,
             )
             self.plant.SetVelocities(
                 self.plant_context,
-                self.plant.GetModelInstanceByName("tblock_paper"),
+                self.plant.GetModelInstanceByName("scaled_tblock"),
                 np.zeros(6),
             )
+            pass
         jpos = self.desired_joint_position.Eval(self.diagram_context)
         self.plant.SetPositions(
             self.plant_context,
@@ -269,7 +272,7 @@ class ScaraSimEnv(BaseRobotEnv):
         if self.visualize_robot_flag and self.active_meshcat:
             mesh_path = (
                 Path(__file__).resolve().parent.parent.parent.parent
-                / "assets/tblock_paper/tblock_paper.obj"
+                / "assets/tblock_paper/scaled_tblock.obj"
             )
             tblock_mesh = o3d.io.read_triangle_mesh(Path(mesh_path).resolve().__str__())
             triangles = np.asarray(tblock_mesh.triangles)
@@ -350,12 +353,12 @@ class ScaraSimEnv(BaseRobotEnv):
         robot_pos = robot_state[: self.nq]
         robot_vel = robot_state[self.nq :]
 
-        block_state = self.plant.get_state_output_port(
-            self.plant.GetModelInstanceByName("tblock_paper")
-        ).Eval(self.plant_context)
+        # block_state = self.plant.get_state_output_port(
+        #     self.plant.GetModelInstanceByName("tblock_paper")
+        # ).Eval(self.plant_context)
 
-        block_pose = block_state[:7]
-        block_vel = block_state[7:]
+        # block_pose = block_state[:7]
+        # block_vel = block_state[7:]
 
         eef_pose = self.plant.CalcRelativeTransform(
             self.plant_context,
@@ -370,8 +373,8 @@ class ScaraSimEnv(BaseRobotEnv):
         info = {
             "robot_pos": robot_pos,
             "robot_vel": robot_vel,
-            "block_pose": block_pose,
-            "block_vel": block_vel,
+            # "block_pose": block_pose,
+            # "block_vel": block_vel,
             "eef_pos": eef_pos,
             "eef_quat": eef_quat,
             "eef_vel": eef_vel.translational(),
@@ -381,19 +384,20 @@ class ScaraSimEnv(BaseRobotEnv):
         return info
 
     def _compute_reward(self, info):
-        goal_pos = self.goal_pose_transform.translation()
-        block_pos = info["block_pose"][4:]
-        r1 = -np.linalg.norm(goal_pos - block_pos)
+        # goal_pos = self.goal_pose_transform.translation()
+        # block_pos = info["block_pose"][4:]
+        # r1 = -np.linalg.norm(goal_pos - block_pos)
 
-        goal_yaw = self.goal_pose_transform.rotation().ToRollPitchYaw().vector()[2]
-        quat = info["block_pose"][:4]
-        block_yaw = (
-            RotationMatrix(Quaternion(quat / np.linalg.norm(quat)))
-            .ToRollPitchYaw()
-            .vector()
-        )[2]
-        r2 = -np.abs(goal_yaw - block_yaw)
-        return r1 + r2
+        # goal_yaw = self.goal_pose_transform.rotation().ToRollPitchYaw().vector()[2]
+        # quat = info["block_pose"][:4]
+        # block_yaw = (
+        #     RotationMatrix(Quaternion(quat / np.linalg.norm(quat)))
+        #     .ToRollPitchYaw()
+        #     .vector()
+        # )[2]
+        # r2 = -np.abs(goal_yaw - block_yaw)
+        # return r1 + r2
+        return 0.0
 
     def _is_done(self, info, reward):
         if abs(reward) < 0.02:
@@ -413,16 +417,17 @@ class ScaraSimEnv(BaseRobotEnv):
         )
         if self.env_objects_flag:
             # fully free block
-            self.plant.SetPositions(
-                self.plant_context,
-                self.plant.GetModelInstanceByName("tblock_paper"),
-                state["block_pose"],
-            )
-            self.plant.SetVelocities(
-                self.plant_context,
-                self.plant.GetModelInstanceByName("tblock_paper"),
-                np.zeros(6),
-            )
+            # self.plant.SetPositions(
+            #     self.plant_context,
+            #     self.plant.GetModelInstanceByName("tblock_paper"),
+            #     state["block_pose"],
+            # )
+            # self.plant.SetVelocities(
+            #     self.plant_context,
+            #     self.plant.GetModelInstanceByName("tblock_paper"),
+            #     np.zeros(6),
+            # )
+            pass
         self.simulator_context.SetTime(state["timestamp"])
 
     def _generate_loader_msg(self):
