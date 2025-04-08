@@ -22,7 +22,7 @@ def main(render_size, control_hz):
     )
     package_name = "scara/"
     urdf_name = "scara.urdf"
-    eef_link_name = ""
+    eef_link_name = "link_3"
 
     # connect to the drake env
     drake_instance = ScaraSimEnv(

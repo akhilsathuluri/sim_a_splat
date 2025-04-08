@@ -93,11 +93,11 @@ class ScaraSimEnv(BaseRobotEnv):
         # TODO: Create API to easily make wrappers around anytype of robot and with an inverse dynamics controller
         self.plant.set_contact_model(ContactModel.kHydroelasticsOnly)
         self.plant.set_penetration_allowance(1e-4)
-        add_ground_with_friction(self.plant)
+        # add_ground_with_friction(self.plant)
         if self.eef_link_name == "":
             logging.warning("Set the end effector body here")
             eef_base_link = self.plant.GetBodyByName(
-                "gripper", self.robot_model_instance
+                "link_3", self.robot_model_instance
             )
 
             self.eef_link_name = "gripper_center"

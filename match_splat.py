@@ -20,11 +20,9 @@ logging.getLogger().setLevel(logging.INFO)
 splat_path_string = "assets/scara/splatfacto/2025-04-02_181852/config.yml"
 
 # for scara
-urdf_location = (
-    Path("./robot_description/scara/urdf/robot-assembly-2.urdf").resolve().__str__()
-)
+urdf_location = Path("./robot_description/scara/urdf/scara.urdf").resolve().__str__()
 match_object_name = "scara"
-package_tag = "package://robot-assembly-2"
+package_tag = "package://scara"
 
 output_dir = Path("assets/scara/masks" + f"/{match_object_name}/").resolve().__str__()
 output_dir_path = Path(output_dir)
@@ -55,7 +53,7 @@ actuated_joints = []
 for joint in robot.joints:
     if joint.joint_type != "fixed":
         actuated_joints.append(joint.name)
-joint_config = [0, -np.pi / 2]
+joint_config = [0] * 2
 cfg = dict(zip(actuated_joints, joint_config))
 translist = robot.visual_geometry_fk(cfg)
 
@@ -71,9 +69,9 @@ for ii in range(len(robot.links)):
             meshes.append(mesh)
 
 # %%
-select_meshes = meshes[:]
-# if len(select_meshes) == 1:
-#     select_meshes = [select_meshes]
+select_meshes = meshes[:-1]
+if len(select_meshes) == 1:
+    select_meshes = [select_meshes]
 
 # %%
 
@@ -86,7 +84,6 @@ for mesh in select_meshes:
 
 # %%
 temp_pcd_path = Path(output_dir + "/point_cloud.pcd")
-# temp_pcd_path = Path(output_dir + "/point_cloud_l1.pcd")
 if temp_pcd_path.exists():
     temp_robot_pcd = o3d.io.read_point_cloud(str(temp_pcd_path))
 else:
@@ -95,7 +92,6 @@ else:
     temp_robot_pcd = point_cloud
 
 # o3d.visualization.draw_plotly([temp_robot_pcd])
-
 # if point clound needs to be cropped -- l2
 # vol = o3d.visualization.SelectionPolygonVolume()
 # vol.orthogonal_axis = "Z"
@@ -131,7 +127,9 @@ else:
 # temp_robot_pcd = vol.crop_point_cloud(temp_robot_pcd)
 
 robot_pcd = temp_robot_pcd
-o3d.visualization.draw_plotly([robot_pcd])
+# o3d.visualization.draw_plotly([robot_pcd])
+o3d.visualization.draw_plotly(select_meshes + [temp_robot_pcd])
+
 
 # %%
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -279,7 +277,7 @@ o3d.visualization.draw_plotly([temp_robot_pcd, crop_robot])
 # %%
 temp_meshes = pycopy(select_meshes)
 temp_meshes = [tmesh.transform(icp_transformation) for tmesh in temp_meshes]
-o3d.visualization.draw_plotly([temp_robot_pcd, crop_robot] + temp_meshes)
+o3d.visualization.draw_plotly([temp_robot_pcd, crop_robot] + temp_meshes + select_meshes)
 
 
 # %%
@@ -293,7 +291,7 @@ for tmesh in temp_meshes:
     scene.add_triangles(tmesh_t)
     occupancy = scene.compute_occupancy(t_points)
     distances = scene.compute_distance(t_points)
-    link_mask = (occupancy.numpy() > 0.5) | (distances.numpy() < 0.009)
+    link_mask = (occupancy.numpy() > 0.5) | (distances.numpy() < 0.01)
     link_masks_local.append(link_mask)
 
 colored_points = np.zeros((points.shape[0], 3))
@@ -315,6 +313,47 @@ colored_pcd.points = o3d.utility.Vector3dVector(points)
 colored_pcd.colors = o3d.utility.Vector3dVector(colored_points)
 
 o3d.visualization.draw_plotly([colored_pcd])
+
+# %% Can do any manual filtering here
+new_colored_points = np.copy(colored_points)
+new_link_masks_local = pycopy(link_masks_local)
+
+# Indices for green and blue colors
+green_index = 1
+blue_index = 2
+
+# Z-threshold
+z_threshold_green = -0.45
+
+# Modify masks and colors for green points
+green_mask = link_masks_local[green_index]
+green_points_indices = np.where(green_mask)[0]
+z_coords_green = points[green_points_indices, 2]
+remove_green_mask = z_coords_green < z_threshold_green
+remove_green_indices = green_points_indices[remove_green_mask]
+
+new_link_masks_local[green_index][remove_green_indices] = False
+new_colored_points[remove_green_indices] = [0, 0, 0]  # Set to black
+
+z_threshold_blue = -0.5
+# Modify masks and colors for blue points
+blue_mask = link_masks_local[blue_index]
+blue_points_indices = np.where(blue_mask)[0]
+z_coords_blue = points[blue_points_indices, 2]
+remove_blue_mask = z_coords_blue < z_threshold_blue
+remove_blue_indices = blue_points_indices[remove_blue_mask]
+
+new_link_masks_local[blue_index][remove_blue_indices] = False
+new_colored_points[remove_blue_indices] = [0, 0, 0]  # Set to black
+
+
+new_colored_pcd = o3d.geometry.PointCloud()
+new_colored_pcd.points = o3d.utility.Vector3dVector(points)
+new_colored_pcd.colors = o3d.utility.Vector3dVector(new_colored_points)
+
+o3d.visualization.draw_plotly([new_colored_pcd])
+
+link_masks_local = new_link_masks_local
 
 # %%
 

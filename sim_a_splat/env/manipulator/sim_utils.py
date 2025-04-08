@@ -138,9 +138,8 @@ def AddRobotModel(
     # unique_id = urdf_utils.make_model_unique()
     unique_id = ""
     urdf_utils.add_joint_limits()
-    urdf_utils.fix_joints_except(["shoulder", "elbow"])
+    urdf_utils.fix_joints_except(["joint_1", "joint_2"])
     urdf_utils.add_actuation_tags()
-
     _, temp_urdf = urdf_utils.get_modified_urdf()
     # urdf_utils.show_temp_urdf(temp_urdf)
     abs_path = Path(package_path).resolve().__str__()
