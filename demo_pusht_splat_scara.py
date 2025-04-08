@@ -33,7 +33,6 @@ def main(render_size, control_hz):
         package_name=package_name,
         urdf_name=urdf_name,
     )
-    splat_env.load_model()
 
     def map_actions(act: np.ndarray):
         if act is None:

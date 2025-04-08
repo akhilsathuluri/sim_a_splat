@@ -197,7 +197,9 @@ class SplatHandler:
         else:
             tblock_mesh = o3d.io.read_triangle_mesh(task_mesh_dir + mesh_name)
         mesh_color = np.tile(
-            np.array([76, 160, 224]) / 255, (len(tblock_mesh.vertices), 1)
+            # np.array([76, 160, 224]) / 255, (len(tblock_mesh.vertices), 1)
+            np.array([28.6, 47.1, 67.5]) / 255,
+            (len(tblock_mesh.vertices), 1),
         )
 
         tblock_mesh_trimesh = trimesh.Trimesh(
@@ -209,8 +211,8 @@ class SplatHandler:
         self.tblock_mesh_frame_handle = self.server.scene.add_mesh_trimesh(
             name=f"{self.instance_uid}/mesh_task/tblock",
             mesh=tblock_mesh_trimesh,
-            # scale=self.scale_factor,
-            scale=1.0,
+            scale=self.scale_factor,
+            # scale=1.0,
         )
 
     def load_handler(self, msg: lcmt_viewer_load_robot):

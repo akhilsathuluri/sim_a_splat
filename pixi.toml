@@ -23,6 +23,7 @@ ipykernel = ">=6.29.5,<7"
 ipympl = ">=0.9.6,<0.10"
 ipython = ">=8.33.0,<9"
 jupyter = ">=1.1.1,<2"
+zarr = ">=2.18.3,<3"
 
 [pypi-dependencies]
 torch = "==2.4.1"

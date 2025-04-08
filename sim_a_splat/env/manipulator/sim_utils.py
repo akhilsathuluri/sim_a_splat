@@ -113,12 +113,12 @@ def add_soft_collisions(
 ):
     proximity_properties_feet = ProximityProperties()
     AddContactMaterial(
-        dissipation=1e0,
-        friction=CoulombFriction(static_friction=1.0, dynamic_friction=0.8),
+        dissipation=1e2,
+        friction=CoulombFriction(static_friction=0.9, dynamic_friction=0.8),
         properties=proximity_properties_feet,
     )
     AddCompliantHydroelasticProperties(
-        resolution_hint=5e-3,
+        resolution_hint=1e-3,
         hydroelastic_modulus=5e6,
         properties=proximity_properties_feet,
     )
@@ -160,7 +160,6 @@ def AddRobotModel(
     robot_model = parser.AddModels(temp_urdf.name)[0]
 
     if weld_frame_transform is not None:
-        print("Welding robot to world frame with transform: ", weld_frame_transform)
         plant.WeldFrames(
             plant.get_body(plant.GetBodyIndices(robot_model)[0]).body_frame(),
             plant.world_frame(),

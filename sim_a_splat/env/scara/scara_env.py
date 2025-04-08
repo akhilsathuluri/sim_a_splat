@@ -130,7 +130,7 @@ class ScaraSimEnv(BaseRobotEnv):
             add_soft_collisions(
                 self.plant,
                 link_name=self.eef_link_name,
-                body=Cylinder(radius=0.008, length=0.045),
+                body=Cylinder(radius=0.01, length=0.05),
             )
             self.end_effector_body = self.plant.GetBodyByName(self.eef_link_name)
             self.end_effector_frame = self.end_effector_body.body_frame()

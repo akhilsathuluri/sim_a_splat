@@ -38,8 +38,10 @@ class SplatEnv(ScaraSimEnv):
         cam_pose_01 = tf.SE3(
             wxyz_xyz=np.concatenate(
                 (
-                    np.array([-0.41946813, 0.89955231, -0.11045113, 0.05150421]),
-                    np.array([-0.15, -0.3, -0.05]),
+                    # np.array([-0.41946813, 0.89955231, -0.11045113, 0.05150421]),
+                    # np.array([-0.15, -0.3, -0.05]),
+                    np.array([0.00, 7.818e-01, -6.235e-01, 0.00]),
+                    np.array([-0.2, 0.36, 0.01]),
                 )
             )
         )
@@ -50,7 +52,7 @@ class SplatEnv(ScaraSimEnv):
         splat_dir = self.splat_root_dir + "/assets/scara"
         match_object_name = "scara"
         splat_config_name = "2025-04-02_181852/config.yml"
-        task_mesh_name = "/assets/tblock_paper/tblock_paper.obj"
+        task_mesh_name = "/assets/tblock_paper/scaled_tblock.obj"
         self.splat_handler = SplatHandler(
             splat_dir,
             match_object_name,
@@ -93,9 +95,11 @@ class SplatEnv(ScaraSimEnv):
         self.splat_handler.draw_handler(draw_msg)
         return draw_msg
 
-    def get_moving_camera_poses(self, msg):
+    def get_moving_camera_poses(
+        self, msg, local_frame_pos=np.array([0.05, -0.05, 0.1])
+    ):
         wxyz, xyz = self.splat_handler.get_attached_frame(
-            self.eef_link_name, np.array([-0.1, 0, 0.033]), msg
+            self.eef_link_name, local_frame_pos, msg
         )
         cam_pose_02 = tf.SE3(wxyz_xyz=np.concatenate((wxyz, xyz)))
         return [cam_pose_02]
