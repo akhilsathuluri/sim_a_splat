@@ -28,16 +28,13 @@ def main(output, render_size, control_hz):
     Hold "Space" to pause.
     """
 
-    # create replay buffer in read-write mode
     replay_buffer = ReplayBuffer.create_from_path(output, mode="a")
 
-    # create PushT env with keypoints
     kp_kwargs = PushTKeypointsEnv.genenerate_keypoint_manager_params()
     env = PushTKeypointsEnv(render_size=render_size, render_action=False, **kp_kwargs)
     agent = env.teleop_agent()
     clock = pygame.time.Clock()
 
-    # connect to the drake env
     package_path = (
         Path(__file__).resolve().parent.parent / "sim_a_splat/robot_description/"
     )
@@ -45,7 +42,6 @@ def main(output, render_size, control_hz):
     urdf_name = "scara.urdf"
     eef_link_name = "link_3"
 
-    # connect to the drake env
     drake_instance = ScaraSimEnv(
         env_objects=True,
         visualise_flag=True,
@@ -61,23 +57,16 @@ def main(output, render_size, control_hz):
             return None
         return np.array([0.075 + 0.3 * act[0] / 298, 0.3 - 0.6 * act[1] / 512, 0.0])
 
-    # episode-level while loop
     while True:
         episode = list()
-        # record in seed order, starting with 0
         seed = replay_buffer.n_episodes
         print(f"starting seed {seed}")
 
-        # set seed for env
         env.seed(seed)
-
-        # reset env and get observations (including info and render for recording)
         obs = env.reset()
         goal_pose = env.goal_pose
         info = env._get_info()
         tblock_pos = info["block_pose"]
-        # tblock_pose: array([172.        , 122.        ,  -3.28337113])
-        # mapped: array([0.50973154, 0.15703125, 0.2       ])
 
         drake_eef_action = map_actions(info["pos_agent"])
         block_action = np.array(list(map_actions(tblock_pos[:2])) + [tblock_pos[2]])
@@ -88,28 +77,22 @@ def main(output, render_size, control_hz):
 
         img = env.render(mode="human")
 
-        # loop state
         retry = False
         pause = False
         done = False
         ddone = False
         plan_idx = 0
         pygame.display.set_caption(f"plan_idx:{plan_idx}")
-        # step-level while loop
         while not ddone:
-            # process keypress events
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        # hold Space to pause
                         plan_idx += 1
                         pygame.display.set_caption(f"plan_idx:{plan_idx}")
                         pause = True
                     elif event.key == pygame.K_r:
-                        # press "R" to retry
                         retry = True
                     elif event.key == pygame.K_q:
-                        # press "Q" to exit
                         exit(0)
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_SPACE:

@@ -92,8 +92,8 @@ class ScaraSimEnv(BaseRobotEnv):
         # self.eef_link_name = self.eef_link_name
         # assumes robot model to be a 6DoF robot arm with fixed base in urdf
         # TODO: Create API to easily make wrappers around anytype of robot and with an inverse dynamics controller
-        self.plant.set_contact_model(ContactModel.kHydroelasticsOnly)
-        self.plant.set_penetration_allowance(1e-4)
+        self.plant.set_contact_model(ContactModel.kHydroelasticWithFallback)
+        self.plant.set_penetration_allowance(1e-5)
         # add_ground_with_friction(self.plant)
         box_coll_id = add_soft_collisions(
             plant=self.plant,
@@ -131,6 +131,9 @@ class ScaraSimEnv(BaseRobotEnv):
                 self.plant,
                 link_name=self.eef_link_name,
                 body=Cylinder(radius=0.01, length=0.05),
+                collision_pose=RigidTransform(
+                    RotationMatrix(), np.array([-0.005, 0.005, 0.0])
+                ),
             )
             self.end_effector_body = self.plant.GetBodyByName(self.eef_link_name)
             self.end_effector_frame = self.end_effector_body.body_frame()

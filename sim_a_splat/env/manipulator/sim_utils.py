@@ -113,13 +113,13 @@ def add_soft_collisions(
 ):
     proximity_properties_feet = ProximityProperties()
     AddContactMaterial(
-        dissipation=1e2,
+        dissipation=1e0,
         friction=CoulombFriction(static_friction=0.9, dynamic_friction=0.8),
         properties=proximity_properties_feet,
     )
     AddCompliantHydroelasticProperties(
-        resolution_hint=1e-3,
-        hydroelastic_modulus=5e6,
+        resolution_hint=5e-2,
+        hydroelastic_modulus=5e5,
         properties=proximity_properties_feet,
     )
     coll_id = plant.RegisterCollisionGeometry(
