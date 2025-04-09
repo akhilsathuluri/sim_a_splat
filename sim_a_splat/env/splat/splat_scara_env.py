@@ -20,8 +20,13 @@ class SplatEnv(ScaraSimEnv):
         package_name=None,
         urdf_name=None,
     ):
+        # when running from e2
+        # self.splat_root_dir = (
+        #     Path(__file__).parent.parent.parent.parent.resolve().__str__()
+        # )
         self.splat_root_dir = (
-            Path(__file__).parent.parent.parent.parent.resolve().__str__()
+            Path(__file__).parent.parent.parent.parent.parent.resolve().__str__()
+            + "/sim_a_splat"
         )
         self.urdf_name = urdf_name
         self.visualise_sim_flag = visualise_sim_flag

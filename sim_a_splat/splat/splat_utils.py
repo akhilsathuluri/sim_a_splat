@@ -13,7 +13,6 @@ from sim_a_splat.ns_utils.nerfstudio_utils import GaussianSplat, SH2RGB
 class GSplatLoader:
     def __init__(self, gsplat_location, device):
         self.device = device
-
         if isinstance(gsplat_location, str):
             self.load_gsplat_from_json(gsplat_location)
         elif isinstance(gsplat_location, Path):
