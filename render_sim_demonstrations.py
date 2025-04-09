@@ -5,6 +5,7 @@ from pathlib import Path
 from sim_a_splat.common.replay_buffer import ReplayBuffer
 from sim_a_splat.env.splat.splat_scara_env import SplatEnv
 from tqdm import tqdm
+import os
 
 # %%
 
@@ -23,9 +24,23 @@ def main(dataset_path, output_path):
     sim_data_buffer = ReplayBuffer.copy_from_path(zarr_path, data_keys)
     n_episodes = sim_data_buffer.n_episodes
 
-    # create replay buffer in read-write mode
+    # Check output path and determine starting point
     output_path = Path(output_path).resolve().__str__()
+
+    # Create or load existing replay buffer
     replay_buffer = ReplayBuffer.create_from_path(output_path, mode="a")
+
+    # Check if we have already rendered some episodes
+    existing_episodes = replay_buffer.n_episodes
+
+    if existing_episodes >= n_episodes:
+        print(f"All {n_episodes} episodes have already been rendered. Nothing to do.")
+        return
+
+    start_episode = existing_episodes
+    print(
+        f"Continuing from episode {start_episode}/{n_episodes} ({existing_episodes} already rendered)"
+    )
 
     # initiate the splat env
     package_path = (
@@ -44,7 +59,8 @@ def main(dataset_path, output_path):
         urdf_name=urdf_name,
     )
 
-    for ii in tqdm(range(n_episodes), desc="Rendering episodes"):
+    # Only process episodes that haven't been rendered yet
+    for ii in tqdm(range(start_episode, n_episodes), desc="Rendering episodes"):
         _ = splat_env.reset()
         episode_data = sim_data_buffer.get_episode(ii)
         rendered_episode = list()
@@ -67,6 +83,9 @@ def main(dataset_path, output_path):
         for key in rendered_episode[0].keys():
             render_data_dict[key] = np.stack([x[key] for x in rendered_episode])
         replay_buffer.add_episode(render_data_dict, compressors="disk")
+        print(f"Completed episode {ii+1}/{n_episodes}")
+
+    print(f"Rendering complete. All {n_episodes} episodes saved to {output_path}")
 
 
 if __name__ == "__main__":
