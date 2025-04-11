@@ -424,7 +424,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c6/65/080509c5774a1592b2779d902a70b5fe008532759927e011f068145a16cb/msgspec-0.19.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/e7/a9/39cf856d03690af6fd570cf40331f1f79acdbb3132a9c35d2c5002f7f30b/multiprocess-0.70.17-py310-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f4/16/e93ebb619a3edd8851df21425fe20b7491bd1d819fc19beb9bfc1bf2556e/nerfacc-0.5.2-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/ee/86/93a22f779f3810be8ddbaae9073c7adfed97d4703a2953e66d36bdb4037a/nerfstudio-1.1.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/b9/54/dd730b32ea14ea797530a4479b2ed46a6fb250f682a9cfb997e968bf0261/networkx-3.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6b/35/a8e38d54768e67324e365e2a41162be298f51ec93e6bd4b18d237d7250d8/ninja-1.11.1.3-py3-none-manylinux_2_12_x86_64.manylinux2010_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/d2/1d/1b658dbd2b9fa9c4c9f32accbfc0205d532c8c6194dc0f2a4c0428e7128a/nodeenv-1.9.1-py2.py3-none-any.whl
@@ -454,7 +453,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/f4/3c/8cc1cc84deffa6e25d2d0c688ebb80635dfdbf1dbea3e30c541c8cf4d860/pydantic-2.10.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/32/90/3b15e31b88ca39e9e626630b4c4a1f5a0dfd09076366f4219429e6786076/pydantic_core-2.27.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/b0/5f/1ebfd430df05c4f9e438dd3313c4456eab937d976f6ab8ce81a98f9fb381/pydot-3.0.4-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/2c/ba/a4bc465d36f6aafbff89da1bf67bcc6a97475b1d2300a74a778dcb293cef/pyliblzfse-0.4.1.tar.gz
       - pypi: https://files.pythonhosted.org/packages/44/b2/5e98847b924748ec293bac6a68bb7d203a9ec328dbf7ef9fb886fd0e2c07/pymeshlab-2022.2.post3-cp310-cp310-manylinux1_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/b1/18/b04c16630a55072df02c55419fde1bd3acd101f56add62781d2a9ac94c5c/pyngrok-7.2.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/49/b3/d8482e8cacc8ea15a356efea13d22ce1c5914a9ee36622ba250523240bf2/pyquaternion-0.9.9-py3-none-any.whl
@@ -495,7 +493,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/cf/4b/9a77dc721aa0b7f74440a42e4ef6f9a4fae7324e17f64f88b96f4c25cc05/typeguard-4.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/11/4f/5ba9e95cfe4b88ccb439b785356de7073b344abc30bf87ea767fedc0a257/tyro-0.9.16-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/0f/dd/84f10e23edd882c6f968c21c2434fe67bd4a528967067515feca9e611e5e/tzdata-2025.1-py2.py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/1b/fe/04034c0fb25f7b823b331c20da35f6f688cadbc57c00f1e0591d88ba6caf/viser-0.2.7-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/59/0f/1bc122f37a7483b3bfce9097327632203f74648ad94f200e2b0226a7ae8e/viser-0.2.23-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/39/3b/5b918a0da0d6920e7f7328cf0ab00df31b905d709f458596304f09096785/wadler_lindig-0.1.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7d/53/361846bf44dcf3bc5a4be0e0cb662b42c7e6996d71c903c936e191657e0d/wandb-0.19.7-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/ff/b5/0945a31562d351cff26d76a2ae9a4ba4536e698aa059a4262afd793b2a1d/websockets-15.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -505,6 +503,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/9a/24/93ce54550a9dd3fd996ed477f00221f215bf6da3580397fbc138d6036e2e/wurlitzer-3.1.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/29/ee/086c7cb4f067238e55fd645188232d67afe1ac6adacbea7a8cf2c6346cd8/xatlas-0.0.9-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/70/52/78858a082725302b3685589d6d85207e6306166d1895833f5c13f3ee852a/yourdfpy-0.0.57-py3-none-any.whl
+      - pypi: ../nerfstudio
       - pypi: ../sak
 packages:
 - conda: https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -4263,20 +4262,21 @@ packages:
   - build ; extra == 'dev'
   - twine ; extra == 'dev'
   requires_python: '>=3.7'
-- pypi: https://files.pythonhosted.org/packages/ee/86/93a22f779f3810be8ddbaae9073c7adfed97d4703a2953e66d36bdb4037a/nerfstudio-1.1.5-py3-none-any.whl
+- pypi: ../nerfstudio
   name: nerfstudio
   version: 1.1.5
-  sha256: ee6d3d360a1e363ad2f1703b602da5a8987485bff812d0ae8aa4a6e672b994c4
+  sha256: 5a8b9ac378bbb0aaa9fba5ede03811feafe3f0fb0371f54ee4c8dfe29dbc7810
   requires_dist:
   - appdirs>=1.4
   - av>=9.2.0
   - comet-ml>=3.33.8
   - cryptography>=38
-  - tyro>=0.6.6
+  - tyro>=0.9.8
   - gdown>=4.6.0
   - ninja>=1.10
   - h5py>=2.9.0
   - imageio>=2.21.1
+  - importlib-metadata>=6.0.0 ; python_full_version < '3.10'
   - ipywidgets>=7.6
   - jaxtyping>=0.2.15
   - jupyterlab>=3.3.4
@@ -4289,10 +4289,14 @@ packages:
   - opencv-python-headless==4.10.0.84
   - pillow>=10.3.0
   - plotly>=5.7.0
-  - protobuf!=3.20.0,<=3.20.3
+  - protobuf!=3.20.0,<=5
+  - pymeshlab>=2022.2.post2 ; platform_machine != 'aarch64' and platform_machine != 'arm64'
+  - pymeshlab<2023.12.post2 ; platform_machine != 'aarch64' and platform_machine != 'arm64' and sys_platform == 'win32'
   - pyngrok>=5.1.0
   - python-socketio>=5.7.1
   - pyquaternion>=0.9.9
+  - rawpy>=0.18.1 ; platform_machine != 'arm64'
+  - newrawpy>=1.0.0b0 ; platform_machine == 'arm64'
   - requests
   - rich>=12.5.1
   - scikit-image>=0.19.3
@@ -4302,7 +4306,7 @@ packages:
   - torchvision>=0.14.1
   - torchmetrics[image]>=1.0.1
   - typing-extensions>=4.4.0
-  - viser==0.2.7
+  - viser==0.2.23
   - nuscenes-devkit>=1.1.1
   - wandb>=0.13.3
   - xatlas
@@ -4314,15 +4318,14 @@ packages:
   - packaging
   - fpsample
   - tensorly
-  - rawpy>=0.18.1 ; platform_machine != 'arm64'
-  - pymeshlab>=2022.2.post2 ; platform_machine != 'aarch64' and platform_machine != 'arm64'
-  - newrawpy>=1.0.0b0 ; platform_machine == 'arm64'
-  - importlib-metadata>=6.0.0 ; python_full_version < '3.10'
-  - pymeshlab<2023.12.post2 ; platform_machine != 'aarch64' and platform_machine != 'arm64' and sys_platform == 'win32'
+  - diffusers==0.16.1 ; extra == 'gen'
+  - transformers==4.29.2 ; extra == 'gen'
+  - accelerate==0.19.0 ; extra == 'gen'
+  - bitsandbytes==0.39.0 ; extra == 'gen'
+  - sentencepiece==0.1.99 ; extra == 'gen'
   - pre-commit==3.3.2 ; extra == 'dev'
   - pytest==7.1.2 ; extra == 'dev'
   - pytest-xdist==2.5.0 ; extra == 'dev'
-  - typeguard==2.13.3 ; extra == 'dev'
   - ruff>=0.6.1 ; extra == 'dev'
   - sshconf==0.2.5 ; extra == 'dev'
   - pycolmap>=0.3.0 ; extra == 'dev'
@@ -4330,9 +4333,9 @@ packages:
   - opencv-stubs==0.0.7 ; extra == 'dev'
   - transformers==4.29.2 ; extra == 'dev'
   - pyright==1.1.331 ; extra == 'dev'
+  - projectaria-tools>=1.3.1 ; sys_platform != 'win32' and extra == 'dev'
   - torch>=1.13.1,<2.2 ; extra == 'dev'
   - awscli==1.33.18 ; extra == 'dev'
-  - projectaria-tools>=1.3.1 ; sys_platform != 'win32' and extra == 'dev'
   - furo==2022.9.29 ; extra == 'docs'
   - ipython==8.6.0 ; extra == 'docs'
   - readthedocs-sphinx-search==0.1.2 ; extra == 'docs'
@@ -4345,12 +4348,8 @@ packages:
   - sphinx-copybutton==0.5.0 ; extra == 'docs'
   - sphinx-design==0.2.0 ; extra == 'docs'
   - sphinxext-opengraph==0.6.3 ; extra == 'docs'
-  - diffusers==0.16.1 ; extra == 'gen'
-  - transformers==4.29.2 ; extra == 'gen'
-  - accelerate==0.19.0 ; extra == 'gen'
-  - bitsandbytes==0.39.0 ; extra == 'gen'
-  - sentencepiece==0.1.99 ; extra == 'gen'
   requires_python: '>=3.8.0'
+  editable: true
 - conda: https://conda.anaconda.org/conda-forge/noarch/nest-asyncio-1.6.0-pyhd8ed1ab_1.conda
   sha256: bb7b21d7fd0445ddc0631f64e66d91a179de4ba920b8381f29b9d006a42788c0
   md5: 598fd7d4d0de2455fb74f56063969a97
@@ -5307,10 +5306,6 @@ packages:
   - pkg:pypi/pygments?source=hash-mapping
   size: 888600
   timestamp: 1736243563082
-- pypi: https://files.pythonhosted.org/packages/2c/ba/a4bc465d36f6aafbff89da1bf67bcc6a97475b1d2300a74a778dcb293cef/pyliblzfse-0.4.1.tar.gz
-  name: pyliblzfse
-  version: 0.4.1
-  sha256: bb0b899b3830c02fdf3dbde48ea59611833f366fef836e5c32cf8145134b7d3d
 - pypi: https://files.pythonhosted.org/packages/44/b2/5e98847b924748ec293bac6a68bb7d203a9ec328dbf7ef9fb886fd0e2c07/pymeshlab-2022.2.post3-cp310-cp310-manylinux1_x86_64.whl
   name: pymeshlab
   version: 2022.2.post3
@@ -6859,35 +6854,38 @@ packages:
   - pkg:pypi/urllib3?source=hash-mapping
   size: 100102
   timestamp: 1734859520452
-- pypi: https://files.pythonhosted.org/packages/1b/fe/04034c0fb25f7b823b331c20da35f6f688cadbc57c00f1e0591d88ba6caf/viser-0.2.7-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/59/0f/1bc122f37a7483b3bfce9097327632203f74648ad94f200e2b0226a7ae8e/viser-0.2.23-py3-none-any.whl
   name: viser
-  version: 0.2.7
-  sha256: f878846c61f066e69645fdd39a443ed307d3bc77a25b34ed845158e7ffeda32b
+  version: 0.2.23
+  sha256: 36e3e60ef61024fec4404857897c1b301695b29350a17451c2ca769e6b26de00
   requires_dist:
-  - websockets>=10.4
-  - numpy>=1.0.0
-  - msgspec>=0.18.6
   - imageio>=2.0.0
+  - msgspec>=0.18.6
+  - nodeenv>=1.8.0
+  - numpy>=1.0.0
+  - plyfile>=1.0.2
+  - psutil>=5.9.5
+  - rich>=13.3.3
   - scikit-image>=0.18.0
   - scipy>=1.7.3
   - tqdm>=4.0.0
-  - tyro>=0.2.0
-  - rich>=13.3.3
   - trimesh>=3.21.7
-  - nodeenv>=1.8.0
-  - psutil>=5.9.5
+  - tyro>=0.2.0
+  - websockets>=13.1
   - yourdfpy>=0.0.53
-  - plyfile>=1.0.2
-  - pyliblzfse>=0.4.1 ; sys_platform != 'win32'
-  - pyright>=1.1.308 ; extra == 'dev'
-  - ruff==0.6.2 ; extra == 'dev'
+  - hypothesis[numpy] ; extra == 'dev'
   - pre-commit==3.3.2 ; extra == 'dev'
-  - torch>=1.13.1 ; extra == 'examples'
-  - matplotlib>=3.7.1 ; extra == 'examples'
-  - plotly>=5.21.0 ; extra == 'examples'
-  - robot-descriptions>=1.10.0 ; extra == 'examples'
+  - pyright>=1.1.308 ; extra == 'dev'
+  - pytest ; extra == 'dev'
+  - ruff>=0.9.3 ; extra == 'dev'
   - gdown>=4.6.6 ; extra == 'examples'
+  - matplotlib>=3.7.1 ; extra == 'examples'
+  - opencv-python ; extra == 'examples'
+  - plotly>=5.21.0 ; extra == 'examples'
   - plyfile ; extra == 'examples'
+  - pyliblzfse>=0.4.1 ; sys_platform != 'win32' and extra == 'examples'
+  - robot-descriptions>=1.10.0 ; extra == 'examples'
+  - torch>=1.13.1 ; extra == 'examples'
   requires_python: '>=3.8'
 - pypi: https://files.pythonhosted.org/packages/39/3b/5b918a0da0d6920e7f7328cf0ab00df31b905d709f458596304f09096785/wadler_lindig-0.1.3-py3-none-any.whl
   name: wadler-lindig

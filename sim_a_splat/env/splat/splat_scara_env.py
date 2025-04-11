@@ -29,6 +29,15 @@ class SplatEnv(ScaraSimEnv):
         # self.splat_root_dir = (
         #     Path(__file__).parent.parent.parent.parent.resolve().__str__()
         # )
+
+        if package_path is None:
+            package_path = (
+                Path(__file__).resolve().parent.parent.parent.parent / "robot_description/"
+            )
+            package_name = "scara/"
+            urdf_name = "scara.urdf"
+            eef_link_name = "link_3"
+
         self.splat_root_dir = (
             Path(__file__).parent.parent.parent.parent.parent.resolve().__str__()
             + "/sim_a_splat"
