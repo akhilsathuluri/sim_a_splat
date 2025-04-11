@@ -19,6 +19,11 @@ class SplatEnv(ScaraSimEnv):
         package_path=None,
         package_name=None,
         urdf_name=None,
+        visualization_width=240,
+        visualization_height=320,
+        obs_type="pixels_agent_pos",
+        render_mode="rgb_array",
+        max_episode_steps=300,
     ):
         # when running from e2
         # self.splat_root_dir = (
@@ -28,6 +33,12 @@ class SplatEnv(ScaraSimEnv):
             Path(__file__).parent.parent.parent.parent.parent.resolve().__str__()
             + "/sim_a_splat"
         )
+        self.visualisation_width = visualization_width
+        self.visualisation_height = visualization_height
+        self.render_mode = render_mode
+        self.obs_type = obs_type
+        self.max_episode_steps = max_episode_steps
+
         self.urdf_name = urdf_name
         self.visualise_sim_flag = visualise_sim_flag
         super().__init__(
@@ -76,12 +87,12 @@ class SplatEnv(ScaraSimEnv):
         return client[0]
 
     def _setup_cameras(
-        self, ch, additional_cam_poses=[], view_cam_idx=-1, render_size=[[240, 320]] * 2
+        self, ch, additional_cam_poses=[], view_cam_idx=-1
     ):
+        self.render_size = [[self.visualisation_width, self.visualisation_height]]*2
         self.cam_poses = additional_cam_poses + self.fixed_cam_poses
         ch.camera.position = self.cam_poses[view_cam_idx].translation()
         ch.camera.wxyz = self.cam_poses[view_cam_idx].rotation().wxyz
-        self.render_size = render_size
         return self.cam_poses
 
     def reset(self, reset_to_state=None):

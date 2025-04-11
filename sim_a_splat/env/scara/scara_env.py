@@ -41,12 +41,15 @@ from sim_a_splat.env.manipulator.sim_utils import (
     MakeHardwareStation,
 )
 
-from sim_a_splat.env.manipulator.base_robot_env import BaseRobotEnv
+# from sim_a_splat.env.manipulator.base_robot_env import BaseRobotEnv
+import gymnasium as gym
+from gymnasium import spaces
 
 # %%
 
 
-class ScaraSimEnv(BaseRobotEnv):
+class ScaraSimEnv(gym.Env):
+    metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 10}
     def __init__(
         self,
         env_objects=True,
@@ -67,6 +70,23 @@ class ScaraSimEnv(BaseRobotEnv):
         self.package_path = package_path
         self.package_name = package_name
         self.urdf_name = urdf_name
+
+        # add gym stuff
+        self.observation_space= spaces.Dict({
+            "robot_eef_pos": spaces.Box(
+                low=np.array([0.075, -0.3, 0.0]),
+                high=np.array([0.375, 0.3, 0.0]),
+                dtype=np.float64,
+            ),
+            "camera_1": spaces.Box(
+                low=0,
+                high=255,
+                shape=(240, 320, 3),
+                dtype=np.uint8,
+            )
+        })
+        self.action_space = spaces.Box(low=np.array([0.075, -0.3]), high=np.array([0.375, 0.3]), shape=(2,), dtype=np.float32)
+
 
     def load_model(self):
         builder = DiagramBuilder()

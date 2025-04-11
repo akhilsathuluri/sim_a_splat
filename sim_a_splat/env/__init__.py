@@ -10,9 +10,7 @@ and tasks.
 """
 
 from .xarm.xarm_env import XarmSimEnv
+from .scara.scara_env import ScaraSimEnv
+from .splat.splat_scara_env import SplatEnv
 
-# from .splat.splat_env import SplatEnv
-
-
-# __all__ = ["XarmSimEnv", "SplatEnv"]
-__all__ = ["XarmSimEnv"]
+__all__ = ["XarmSimEnv", "ScaraSimEnv", "SplatEnv"]
