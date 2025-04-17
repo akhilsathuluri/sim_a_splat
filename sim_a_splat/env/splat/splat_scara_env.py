@@ -85,7 +85,7 @@ class SplatEnv(ScaraSimEnv):
             self.urdf_name,
             task_mesh_name=task_mesh_name,
         )
-        for _ in tqdm(range(50), desc="Waiting for client connection"):
+        for _ in tqdm(range(500), desc="Waiting for client connection"):
             client = self.splat_handler.server.get_clients()
             if len(client) > 0:
                 break
@@ -104,7 +104,8 @@ class SplatEnv(ScaraSimEnv):
         ch.camera.wxyz = self.cam_poses[view_cam_idx].rotation().wxyz
         return self.cam_poses
 
-    def reset(self, reset_to_state=None):
+    def reset(self, reset_to_state=None, seed=None, **kwargs):
+        self.seed(seed+1)
         super(SplatEnv, self).reset(reset_to_state)
         draw_msg = super(SplatEnv, self)._generate_draw_msg()
         self.splat_handler.draw_handler(draw_msg)
@@ -112,7 +113,9 @@ class SplatEnv(ScaraSimEnv):
         _ = self._setup_cameras(self.ch, additional_cam_poses=moving_camera_poses)
         if self.visualise_sim_flag:
             super(SplatEnv, self).render()
-        return self._get_obs()
+        observation = self._get_obs()
+        info = self._get_info()
+        return observation, info
 
     def set_visual_state(self, state):
         super(SplatEnv, self)._set_to_state(state)
@@ -141,11 +144,13 @@ class SplatEnv(ScaraSimEnv):
             if self.visualise_sim_flag:
                 super(SplatEnv, self).render()
             observation = self._get_obs()
-        return observation, reward, done, info
+        
+        truncated = False
+        return observation, reward, done, truncated, info
 
     def _get_obs(self):
         eef_pos, _, _, _ = super(SplatEnv, self)._get_obs()
-        eef_pos = eef_pos[:2]
+        # eef_pos = eef_pos[:2]
         img_out = self.render()
         for ii in range(len(img_out)):
             img_out[ii] = np.moveaxis(img_out[ii], -1, 0)

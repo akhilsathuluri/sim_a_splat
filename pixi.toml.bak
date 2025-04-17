@@ -5,6 +5,9 @@ name = "sim_a_splat"
 platforms = ["linux-64"]
 version = "0.1.0"
 
+[tasks]
+post_install = "pip install viser==0.2.23"
+
 [dependencies]
 python = "3.10.*"
 matplotlib = ">=3.10.1,<4"
@@ -21,6 +24,9 @@ ipympl = ">=0.9.6,<0.10"
 ipython = ">=8.33.0,<9"
 jupyter = ">=1.1.1,<2"
 zarr = ">=2.18.3,<3"
+setuptools = ">=78.1.0,<79"
+libxcrypt = ">=4.4.36,<5"
+
 
 [pypi-dependencies]
 torch = "==2.4.1"
@@ -29,8 +35,16 @@ torchaudio = "==2.4.1"
 nerfstudio = { path = "../nerfstudio", editable = true }
 amo-urdf = { git = "git+https://github.com/ami-iit/amo_urdf.git" }
 sak = { path = "../sak", editable = true }
-drake = ">=1.40.0, <2"
+drake = ">=1.38.0, <2"
 open3d = ">=0.19.0, <0.20"
+gsplat = {git = "https://github.com/nerfstudio-project/gsplat.git", rev = "86dd00c"}
+
 
 [system-requirements]
 libc = "2.35"
+
+[pypi-options]
+no-build-isolation = ["gsplat"]
+
+[build-dependencies]
+pytorch-cuda = "*"

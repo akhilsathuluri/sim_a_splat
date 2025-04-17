@@ -81,11 +81,11 @@ class ScaraSimEnv(gym.Env):
             "camera_1": spaces.Box(
                 low=0,
                 high=255,
-                shape=(240, 320, 3),
+                shape=(3, 240, 320),
                 dtype=np.uint8,
             )
         })
-        self.action_space = spaces.Box(low=np.array([0.075, -0.3]), high=np.array([0.375, 0.3]), shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Box(low=np.array([0.075, -0.3, 0.0]), high=np.array([0.375, 0.3, 0.0]), shape=(3,), dtype=np.float32)
 
 
     def load_model(self):
@@ -235,13 +235,13 @@ class ScaraSimEnv(gym.Env):
         if reset_to_state is None:
             reset_to_state = [
                 self.np_random.uniform(
-                    low=np.array([0.25, -0.3, 0.1]), high=np.array([0.65, 0.3, 0.1])
+                    low=np.array([0.075, -0.3, 0.1]), high=np.array([0.375, 0.3, 0.1])
                 ),
                 self.np_random.uniform(
-                    low=np.array([0.4, -0.183, 0.4, -np.pi]),
-                    high=np.array([0.55, 0.183, 0.4, np.pi]),
+                    low=np.array([0.1, -0.183, 0.2, -np.pi]),
+                    high=np.array([0.3, 0.183, 0.2, np.pi]),
                 ),
-                np.array([0.475, 0.0, 0.4, 0.78539816]),
+                np.array([0.225, 0.0, 0.2, 0.78539816]),
             ]
         self.pose_input_port.FixValue(
             self.diagram_context,
@@ -361,7 +361,8 @@ class ScaraSimEnv(gym.Env):
                 self.meshcat.Delete("eef_goal")
             except:
                 pass
-
+            
+        info['is_success'] = done
         return observation, reward, done, info
 
     def _get_obs(self):

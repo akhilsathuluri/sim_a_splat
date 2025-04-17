@@ -399,7 +399,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f5/e8/f6bd1eee09314e7e6dee49cbe2c5e22314ccdb38db16c9fc72d2fa80d054/docker_pycreds-0.4.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d5/7c/e9fcff7623954d86bdc17782036cbf715ecab1bec4847c008557affe1ca8/docstring_parser-0.16-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/7a/bc/57701eaa44631db408053f1f9937b6e31ec74c43071616148bdccd99e3cd/drake-1.38.0-cp310-cp310-manylinux_2_35_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/8d/2f/5e1acd5d3948dec8c48c887eced9edb0470b64894243c790f6fb3faaa7a9/drake-1.40.0-cp310-cp310-manylinux_2_34_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/db/40/831bed622eeacfa21f47d1fd75fc0c33a70a2cf1c091ae955be63e94144c/dulwich-0.22.8-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/91/9a/d882fd7562208456236fb2e62b762bf16fbc9ecde842bb871f676ca0f7e1/everett-3.1.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/89/ec/00d68c4ddfedfe64159999e5f8a98fb8442729a63e2077eb9dcd89623d27/filelock-3.17.0-py3-none-any.whl
@@ -1251,10 +1251,10 @@ packages:
   purls: []
   size: 69544
   timestamp: 1739569648873
-- pypi: https://files.pythonhosted.org/packages/7a/bc/57701eaa44631db408053f1f9937b6e31ec74c43071616148bdccd99e3cd/drake-1.38.0-cp310-cp310-manylinux_2_35_x86_64.whl
+- pypi: https://files.pythonhosted.org/packages/8d/2f/5e1acd5d3948dec8c48c887eced9edb0470b64894243c790f6fb3faaa7a9/drake-1.40.0-cp310-cp310-manylinux_2_34_x86_64.whl
   name: drake
-  version: 1.38.0
-  sha256: 740a9bb346f21acc0fda044fbeb75afdd92feac1997f1a3741895f98c3fa295b
+  version: 1.40.0
+  sha256: 5337eff173c35c49f30bd1e1803ccee62d3cb1e3d45b28092afdffc409197312
   requires_dist:
   - matplotlib
   - numpy
