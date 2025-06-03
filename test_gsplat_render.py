@@ -15,7 +15,7 @@ colors_ex = torch.rand((100, 3), device=device)
 opacities_ex = torch.rand((100,), device=device)
 viewmats = torch.eye(4, device=device)[None, :, :]
 Ks = torch.tensor(
-    [[300.0, 0.0, 150.0], [0.0, 300.0, 100.0], [0.0, 0.0, 1.0]], device=device
+    [[300.0, 0.0, 0.0], [0.0, 300.0, 0.0], [0.0, 0.0, 1.0]], device=device
 )[None, :, :]
 width, height = 300, 200
 
@@ -58,7 +58,7 @@ height = 240
 # )[None, :, :]
 # for rpi v2 camera
 Ks = torch.tensor(
-    [[304.0, 0.0, 160.0], [0.0, 304.0, 120.0], [0.0, 0.0, 1.0]], device=device
+    [[300.0, 0.0, 160.0], [0.0, 300.0, 120.0], [0.0, 0.0, 1.0]], device=device
 )[None, :, :]
 
 # %%

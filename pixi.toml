@@ -21,6 +21,9 @@ ipympl = ">=0.9.6,<0.10"
 ipython = ">=8.33.0,<9"
 jupyter = ">=1.1.1,<2"
 zarr = ">=2.18.3,<3"
+playwright = ">=1.51.1,<2"
+pycolmap = ">=3.11.1,<4"
+colmap = ">=3.11.1,<4"
 
 [pypi-dependencies]
 torch = "==2.4.1"
@@ -31,6 +34,7 @@ amo-urdf = { git = "git+https://github.com/ami-iit/amo_urdf.git" }
 sak = { path = "../sak", editable = true }
 drake = ">=1.40.0, <2"
 open3d = ">=0.19.0, <0.20"
+playwright = ">=1.51.0, <2"
 
 [system-requirements]
 libc = "2.35"
