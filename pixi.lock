@@ -98,7 +98,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libclang-cpp20.1-20.1.6-default_h1df26ce_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libclang13-20.1.6-default_he06ed0a_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcups-2.3.3-h4637d8d_4.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.14.0-h332b0f4_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.14.1-h332b0f4_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libdeflate-1.24-h86f0d12_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libdrm-2.4.124-hb9d3cd8_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libedit-3.1.20250104-pl5321h7949ede_0.conda
@@ -340,7 +340,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/a0/61/5c78b91c3143ed5c14207f463aecfc8f9dbb5092fb2869baf37c273b2705/gitdb-4.0.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1d/9a/4114a9057db2f1462d5c8f8390ab7383925fe1ac012eaa42402ad65c2963/GitPython-3.1.44-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6b/33/8c954ec8b38fbb084726f57d3bff091f523049c88e8d7a5603da548da323/grpcio-1.72.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-      - pypi: git+https://github.com/nerfstudio-project/gsplat.git?rev=86dd00c#86dd00c69b71d956d70f581e08b96829b22b48ea
+      - pypi: https://files.pythonhosted.org/packages/71/3f/6368ffb0e96f1457016a3b4b31f3e3bcf0d2bf83ddf4f64dc340c60dd43b/gsplat-1.5.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/f5/f66802a942d491edb555dd61e3a9961140fd64c90bce1eafd741609d334d/httpcore-1.0.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl
@@ -1781,9 +1781,10 @@ packages:
   requires_dist:
   - grpcio-tools>=1.72.1 ; extra == 'protobuf'
   requires_python: '>=3.9'
-- pypi: git+https://github.com/nerfstudio-project/gsplat.git?rev=86dd00c#86dd00c69b71d956d70f581e08b96829b22b48ea
+- pypi: https://files.pythonhosted.org/packages/71/3f/6368ffb0e96f1457016a3b4b31f3e3bcf0d2bf83ddf4f64dc340c60dd43b/gsplat-1.5.2-py3-none-any.whl
   name: gsplat
-  version: 1.5.0
+  version: 1.5.2
+  sha256: 6a14e263b06615ee2ee9bf2d15362bfbf0aaa8e4a7829f9353e57ebc5d794115
   requires_dist:
   - ninja
   - numpy
@@ -2762,9 +2763,9 @@ packages:
   purls: []
   size: 4519402
   timestamp: 1689195353551
-- conda: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.14.0-h332b0f4_0.conda
-  sha256: ddfcb508b723e1ef4234c517da18820cdbb40cc060f3b120aaa8a18eb6ab0564
-  md5: d1738cf06503218acee63669029fd8e8
+- conda: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.14.1-h332b0f4_0.conda
+  sha256: b6c5cf340a4f80d70d64b3a29a7d9885a5918d16a5cb952022820e6d3e79dc8b
+  md5: 45f6713cb00f124af300342512219182
   depends:
   - __glibc >=2.17,<3.0.a0
   - krb5 >=1.21.3,<1.22.0a0
@@ -2777,8 +2778,8 @@ packages:
   license: curl
   license_family: MIT
   purls: []
-  size: 448248
-  timestamp: 1748430884579
+  size: 449910
+  timestamp: 1749033146806
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libdeflate-1.24-h86f0d12_0.conda
   sha256: 8420748ea1cc5f18ecc5068b4f24c7a023cc9b20971c99c824ba10641fb95ddf
   md5: 64f0c503da58ec25ebd359e4d990afa8
@@ -3755,7 +3756,7 @@ packages:
   md5: e71f31f8cfb0a91439f2086fc8aa0461
   depends:
   - libgcc-ng >=12
-  - libxml2 >=2.12.1,<2.14.0a0
+  - libxml2 >=2.12.1,<3.0.0a0
   license: MIT
   license_family: MIT
   purls: []
