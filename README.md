@@ -37,15 +37,9 @@ The demo uses Microsoft Edge browser with a split window functionality to view t
 The "digital twin" environment is wrapped as an env compatible with [Gymnasium](https://github.com/Farama-Foundation/Gymnasium), meaning, that the Guassian splat can be used to perform training or for collecting data using the typical RL pipeline. 
 
 ### Common issues
-In some cases an older version of `viser (0.2.7)` since that is the locked version by `nerfstudio (1.1.5)` resulting in an error,
-```
-AttributeError: 'SceneApi' object has no attribute 'add_gaussian_splats'. Did you mean: '_add_gaussian_splats'?
-```
-This can be resolved by running, 
+> In some cases an older version of `viser (0.2.7)` since that is the locked version by `nerfstudio (1.1.5)` resulting in an error
 
-```
-pixi run pip install viser==0.2.23 
-```
+This is now fixed by installing the fork of nerfstudio that ports the updated viser version.
 
 ### Acknowledgements
 - The repo uses the code from [splatnav](https://github.com/chengine/splatnav) for loading and viewing the Gaussian splat.
