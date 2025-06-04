@@ -31,3 +31,16 @@ packages = ["sim_a_splat"]
 
 [tool.setuptools.package-data]
 "sim_a_splat" = ["**/*.stl", "**/*.urdf", "**/*.yaml"]
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.pypi-dependencies]
+sim_a_splat = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+
+[tool.pixi.dependencies]
+python = "==3.10"
+torch = "*"
+torchvision = "*"
