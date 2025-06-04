@@ -71,6 +71,12 @@ class PushTEnv(gym.Env):
         self.damping = damping
         self.render_action = render_action
 
+        # compatible API for pymunk 7.0.0
+        self.collision_types = {
+            "agent": 1,
+            "tblock": 2,
+        }
+
         """
         If human-rendering is used, `self.window` will be a reference
         to the window that we draw to. `self.clock` will be a clock that is used
@@ -356,8 +362,10 @@ class PushTEnv(gym.Env):
         )  # x, y, theta (in radians)
 
         # Add collision handling
-        self.collision_handeler = self.space.add_collision_handler(0, 0)
-        self.collision_handeler.post_solve = self._handle_collision
+        # Use the new on_collision API instead of add_collision_handler
+        self.space.on_collision(
+            self.collision_types["agent"], self.collision_types["tblock"]
+        )
         self.n_contact_points = 0
 
         self.max_score = 50 * 100
@@ -374,6 +382,7 @@ class PushTEnv(gym.Env):
         body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
         body.position = position
         body.friction = 1
+        body.collision_type = self.collision_types["agent"]
         shape = pymunk.Circle(body, radius)
         shape.color = pygame.Color("RoyalBlue")
         self.space.add(body, shape)
@@ -426,5 +435,6 @@ class PushTEnv(gym.Env):
         body.position = position
         body.angle = angle
         body.friction = 1
+        body.collision_type = self.collision_types["tblock"]
         self.space.add(body, shape1, shape2)
         return body
