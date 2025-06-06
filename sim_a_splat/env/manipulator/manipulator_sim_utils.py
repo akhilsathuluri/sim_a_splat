@@ -226,7 +226,6 @@ def MakeHardwareStation(
     builder.ExportInput(
         robot_controller.get_input_port_estimated_state(), "robot_estimated_state"
     )
-    # builder.ExportOutput(robot_controller.get_output_port(), "robot_torque_commanded")
     builder.ExportOutput(
         robot_controller.GetOutputPort("actuation"), "robot_torque_commanded"
     )
