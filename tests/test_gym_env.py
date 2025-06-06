@@ -7,14 +7,14 @@ sys.path.append(Path(__file__).resolve().parent.parent.__str__())
 from sim_a_splat.env.manipulator.manipulator_env import ManipulatorSimEnv
 import numpy as np
 
-# package_path = (
-#     Path(__file__).resolve().parent.parent.parent
-#     / "sim_a_splat/robot_description/xarm_description/"
-# )
-# package_name = "xarm6/"
-# urdf_name = "xarm6_with_push_gripper.urdf"
-# eef_link_name = "push_gripper_base_link"
-# num_dof = 6
+package_path = (
+    Path(__file__).resolve().parent.parent.parent
+    / "sim_a_splat/robot_description/xarm_description/"
+)
+package_name = "xarm6/"
+urdf_name = "xarm6_with_push_gripper.urdf"
+eef_link_name = "push_gripper_base_link"
+num_dof = 6
 
 # package_path = (
 #     Path(__file__).resolve().parent.parent.parent / "sim_a_splat/robot_description/"
@@ -24,13 +24,13 @@ import numpy as np
 # eef_link_name = "link5"
 # num_dof = 5
 
-package_path = (
-    Path(__file__).resolve().parent.parent.parent / "sim_a_splat/robot_description/"
-)
-package_name = "scara/"
-urdf_name = "scara.urdf"
-eef_link_name = "gripper"
-num_dof = 3
+# package_path = (
+#     Path(__file__).resolve().parent.parent.parent / "sim_a_splat/robot_description/"
+# )
+# package_name = "scara/"
+# urdf_name = "scara.urdf"
+# eef_link_name = "gripper"
+# num_dof = 3
 
 manipulator_env = ManipulatorSimEnv(
     env_objects=False,
@@ -42,9 +42,14 @@ manipulator_env = ManipulatorSimEnv(
     num_dof=num_dof,
 )
 
-manipulator_env.load_model()
-# obs, info = manipulator_env.reset(reset_to_state={"eef_pos": [0.5, -1, 0.7]})
-obs, info = manipulator_env.reset()
+# %%
+
+# obs, info = manipulator_env.reset()
+obs, info = manipulator_env.reset(reset_to_state={"robot_pos": [0.0] * 6})
+
+# %%
+
+manipulator_env.step([0.01] * 6)
 
 # %% Create a random walk
 

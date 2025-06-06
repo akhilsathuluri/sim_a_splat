@@ -14,7 +14,6 @@ from pydrake.all import (
     AddCompliantHydroelasticProperties,
     HalfSpace,
     Cylinder,
-    PlanarJoint,
     RobotDiagramBuilder,
     InverseDynamicsController,
     StateInterpolatorWithDiscreteDerivative,
@@ -217,9 +216,9 @@ def MakeHardwareStation(
     robot_controller = builder.AddSystem(
         InverseDynamicsController(
             controller_plant,
-            kp=[400.0] * control_plant_pos,
+            kp=[100.0] * control_plant_pos,
             ki=[0.0] * control_plant_pos,
-            kd=[40.0] * control_plant_pos,
+            kd=[20.0] * control_plant_pos,
             has_reference_acceleration=False,
         )
     )

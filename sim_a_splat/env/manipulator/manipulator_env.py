@@ -126,8 +126,9 @@ class ManipulatorSimEnv(gym.Env):
             shape=(self.num_dof,),
             dtype=np.float32,
         )
+        self._load_model()
 
-    def load_model(self):
+    def _load_model(self):
         builder = DiagramBuilder()
         plant, scene_graph = AddMultibodyPlantSceneGraph(
             builder, time_step=self.time_step
@@ -230,9 +231,8 @@ class ManipulatorSimEnv(gym.Env):
         #     self.diagram_context,
         #     RigidTransform(RollPitchYaw(3.14, 0, 0), reset_to_state["eef_pos"][:3]),
         # )
-        self.robot_pos_input_port.FixValue(
-            self.diagram_context, reset_to_state["robot_pos"]
-        )
+        jpos = reset_to_state["robot_pos"]
+        self.robot_pos_input_port.FixValue(self.diagram_context, jpos)
 
         if self.env_objects_flag:
             reset_to_state["block_pos"][2] = 0
@@ -264,16 +264,16 @@ class ManipulatorSimEnv(gym.Env):
             )
 
         # jpos = self.desired_joint_position.Eval(self.diagram_context)
-        # self.plant.SetPositions(
-        #     self.plant_context,
-        #     self.robot_model_instance,
-        #     jpos,
-        # )
-        # self.plant.SetVelocities(
-        #     self.plant_context,
-        #     self.robot_model_instance,
-        #     np.zeros(len(jpos)),
-        # )
+        self.plant.SetPositions(
+            self.plant_context,
+            self.robot_model_instance,
+            jpos,
+        )
+        self.plant.SetVelocities(
+            self.plant_context,
+            self.robot_model_instance,
+            np.zeros(len(jpos)),
+        )
         self.simulator.Initialize()
 
         observation = self._get_obs()
