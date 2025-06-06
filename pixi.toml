@@ -28,7 +28,6 @@ nerfstudio = { git = "git+https://github.com/akhilsathuluri/nerfstudio.git"}
 amo-urdf = { git = "git+https://github.com/ami-iit/amo_urdf.git" }
 sak = { path = "../sak", editable = true }
 drake = ">=1.38.0, <2"
-gsplat = {git = "https://github.com/nerfstudio-project/gsplat.git", rev = "86dd00c"}
 
 [system-requirements]
 libc = "2.35"
