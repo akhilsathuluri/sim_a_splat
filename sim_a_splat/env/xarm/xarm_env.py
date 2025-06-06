@@ -53,6 +53,7 @@ class XarmSimEnv:
         package_path=None,
         package_name=None,
         urdf_name=None,
+        num_dof=6,
     ):
         self.active_meshcat = False
         self.time_step = 1e-2
@@ -65,6 +66,7 @@ class XarmSimEnv:
         self.package_path = package_path
         self.package_name = package_name
         self.urdf_name = urdf_name
+        self.num_dof = num_dof
 
     def load_model(self):
         builder = DiagramBuilder()
@@ -119,7 +121,9 @@ class XarmSimEnv:
                 uid=self.uid,
             )
         )
-        pose2config = builder.AddSystem(PoseToConfig(plant, self.end_effector_frame))
+        pose2config = builder.AddSystem(
+            PoseToConfig(plant, self.end_effector_frame, self.num_dof)
+        )
         builder.Connect(
             plant.get_state_output_port(self.robot_model_instance),
             station.GetInputPort("robot_estimated_state"),
@@ -387,7 +391,7 @@ class XarmSimEnv:
             self.plant.SetVelocities(
                 self.plant_context,
                 self.plant.GetModelInstanceByName("tblock_paper"),
-                np.zeros(6),
+                np.zeros(self.num_dof),
             )
         self.simulator_context.SetTime(state["timestamp"])
 

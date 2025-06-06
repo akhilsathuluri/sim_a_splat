@@ -18,6 +18,7 @@ class SplatEnv(XarmSimEnv):
         package_path=None,
         package_name=None,
         urdf_name=None,
+        num_dof=6,
     ):
         self.splat_root_dir = (
             Path(__file__).parent.parent.parent.parent.resolve().__str__()
@@ -25,11 +26,13 @@ class SplatEnv(XarmSimEnv):
         self.urdf_name = urdf_name
         self.visualise_sim_flag = visualise_sim_flag
         super().__init__(
+            env_objects=False,
             visualise_flag=self.visualise_sim_flag,
             eef_link_name=eef_link_name,
             package_path=package_path,
             package_name=package_name,
             urdf_name=urdf_name,
+            num_dof=num_dof,
         )
         super(SplatEnv, self).load_model()
         self.ch = self._setup_splats()
@@ -46,9 +49,9 @@ class SplatEnv(XarmSimEnv):
         self.cam_poses = []
 
     def _setup_splats(self):
-        splat_dir = self.splat_root_dir + "/assets/robots-scene-v2"
-        match_object_name = "xarm6-1"
-        splat_config_name = "2024-12-06_150850/config.yml"
+        splat_dir = self.splat_root_dir + "/assets/divar113vhw"
+        match_object_name = "divar113vhw"
+        splat_config_name = "2025-06-03_191520/config.yml"
         task_mesh_name = "/assets/tblock_paper/tblock_paper.obj"
         self.splat_handler = SplatHandler(
             splat_dir,
@@ -94,7 +97,7 @@ class SplatEnv(XarmSimEnv):
 
     def get_moving_camera_poses(self, msg):
         wxyz, xyz = self.splat_handler.get_attached_frame(
-            "push_gripper_base_link", np.array([-0.1, 0, 0.033]), msg
+            "link5", np.array([-0.1, 0, 0.033]), msg
         )
         cam_pose_02 = tf.SE3(wxyz_xyz=np.concatenate((wxyz, xyz)))
         return [cam_pose_02]

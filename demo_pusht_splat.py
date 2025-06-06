@@ -16,12 +16,11 @@ def main(render_size, control_hz):
     clock = pygame.time.Clock()
 
     package_path = (
-        Path(__file__).resolve().parent.parent
-        / "sim_a_splat/robot_description/xarm_description/"
+        Path(__file__).resolve().parent.parent / "sim_a_splat/robot_description/"
     )
-    package_name = "xarm6/"
-    urdf_name = "xarm6_with_push_gripper.urdf"
-    eef_link_name = "push_gripper_base_link"
+    package_name = "divar113vhw/"
+    urdf_name = "divar113vhw.urdf"
+    eef_link_name = "link5"
 
     splat_env = SplatEnv(
         visualise_sim_flag=True,

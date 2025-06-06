@@ -8,38 +8,25 @@ from sim_a_splat.splat.splat_utils import GSplatLoader
 from copy import deepcopy as pycopy
 from urchin import URDF
 import logging
-import json
 import tempfile
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
 # %%
-# for lite6-1
-# urdf_location = (
-#     Path("./robot_description/xarm_description/lite6/urdf/lite6.urdf")
-#     .resolve()
-#     .__str__()
-# )
-# package_tag = "package://lite6"
-# match_object_name = "lite6-1"
-
-# for xarm6-2
 urdf_location = (
-    Path("./robot_description/xarm_description/xarm6/urdf/xarm6_with_push_gripper.urdf")
-    .resolve()
-    .__str__()
+    Path("./robot_description/divar113vhw/urdf/divar113vhw.urdf").resolve().__str__()
 )
-match_object_name = "xarm6-2"
-package_tag = "package://xarm6"
+match_object_name = "divar113v"
+package_tag = "package://divar113vhw"
 
 output_dir = (
-    Path("assets/robots-scene-v2/masks" + f"/{match_object_name}/").resolve().__str__()
+    Path("assets/divar113vhw/masks" + f"/{match_object_name}/").resolve().__str__()
 )
 output_dir_path = Path(output_dir)
 output_dir_path.mkdir(parents=True, exist_ok=True)
-splat_path_string = "assets/robots-scene-v2/splatfacto/2024-12-06_150850/config.yml"
-robot_mesh_dir = Path("./robot_description/xarm_description/xarm6/").resolve()
+splat_path_string = "assets/divar113vhw/splatfacto/2025-06-03_191520/config.yml"
+robot_mesh_dir = Path("./robot_description/divar113vhw/").resolve()
 
 # %%
 with open(urdf_location, "r") as file:
@@ -64,7 +51,7 @@ actuated_joints = []
 for joint in robot.joints:
     if joint.joint_type != "fixed":
         actuated_joints.append(joint.name)
-joint_config = [0] * 6 + [0.85] * 6
+joint_config = [0, 3.0, 3.14, 0, 0]
 cfg = dict(zip(actuated_joints, joint_config))
 translist = robot.visual_geometry_fk(cfg)
 
@@ -86,7 +73,7 @@ if len(select_meshes) == 1:
 
 # %%
 
-o3d.visualization.draw_plotly(select_meshes)
+# o3d.visualization.draw_plotly(select_meshes)
 
 # %%
 combined_mesh = o3d.geometry.TriangleMesh()
@@ -103,7 +90,7 @@ else:
     temp_robot_pcd = point_cloud
 
 # %%
-o3d.visualization.draw_plotly([temp_robot_pcd])
+# o3d.visualization.draw_plotly([temp_robot_pcd])
 robot_pcd = temp_robot_pcd
 
 # %%
@@ -135,33 +122,21 @@ o3d.visualization.draw_plotly([splat_pcd])
 # %%
 vol = o3d.visualization.SelectionPolygonVolume()
 vol.orthogonal_axis = "Z"
-vol.axis_min = -0.312
-vol.axis_max = 0.2
+vol.axis_min = -0.3
+vol.axis_max = 0.18
 
-# for xarm6-2
 # fmt: off
 polygon_bounds = o3d.utility.Vector3dVector([
-    [0.3, -0.06, 0],
-    [0.49, -0.06, 0],
-    [0.49, 0.18, 0],
-    [0.3, 0.18, 0]
+    [-0.25, 0.2, 0],
+    [0.42, 0.2, 0],
+    [0.42, 0.58, 0],
+    [-0.25, 0.58, 0]
 ])
 vol.bounding_polygon = o3d.utility.Vector3dVector(polygon_bounds)
 
-# for lite6-1
-# fmt: off
-# polygon_bounds = o3d.utility.Vector3dVector([
-#     [0.089, -0.4, 0],
-#     [0.26, -0.4, 0],
-#     [0.26, -0.23, 0],
-#     [0.089, -0.23, 0]
-# ])
-# vol.bounding_polygon = o3d.utility.Vector3dVector(polygon_bounds)
-# fmt: on
-
 crop_robot = vol.crop_point_cloud(splat_pcd)
 o3d.visualization.draw_plotly([crop_robot])
-# o3d.visualization.draw_plotly([crop_robot, robot_pcd])
+o3d.visualization.draw_plotly([crop_robot, robot_pcd])
 
 
 # %%
@@ -173,7 +148,7 @@ logging.warning("Using existing bounding polygon guess. Modify if needed.")
 center_crop_robot = crop_robot.get_center()
 center_robot_pcd = robot_pcd.get_center()
 translate_robot_pcd_to_crop = center_crop_robot - center_robot_pcd
-R = robot_pcd.get_rotation_matrix_from_xyz((0, 0, -np.pi / 2))
+R = robot_pcd.get_rotation_matrix_from_xyz((0, 0, 0))
 threshold = 0.2
 trans_init = np.eye(4)
 scale_init = 1

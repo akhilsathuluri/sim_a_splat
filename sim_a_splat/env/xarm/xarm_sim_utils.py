@@ -29,7 +29,7 @@ import logging
 
 
 class PoseToConfig(LeafSystem):
-    def __init__(self, plant: MultibodyPlant, frame: Frame):
+    def __init__(self, plant: MultibodyPlant, frame: Frame, num_dof: int):
         LeafSystem.__init__(self)
         self.plant = plant
         self.frame = frame
@@ -38,7 +38,7 @@ class PoseToConfig(LeafSystem):
             "pose",
             AbstractValue.Make(RigidTransform()),
         )
-        self.out_port_len = 6
+        self.out_port_len = num_dof
         self.DeclareVectorOutputPort(
             "config",
             self.out_port_len,
@@ -133,20 +133,20 @@ def AddRobotModel(
     urdf_utils.modify_meshes()
     logging.warning("removing collision tags!")
     urdf_utils.remove_collisions_except([])
-    # unique_id = urdf_utils.make_model_unique()
     unique_id = ""
+    urdf_utils.add_joint_limits()
     urdf_utils.add_actuation_tags()
     _, temp_urdf = urdf_utils.get_modified_urdf()
     abs_path = Path(package_path).resolve().__str__()
     parser.package_map().Add(package_name.split("/")[0], abs_path + "/" + package_name)
     robot_model = parser.AddModels(temp_urdf.name)[0]
 
-    # if weld_frame_transform is not None:
-    #     weld_frame = plant.WeldFrames(
-    #         plant.get_body(plant.GetBodyIndices(robot_model)[0]).body_frame(),
-    #         plant.world_frame(),
-    #         weld_frame_transform,
-    #     )
+    if weld_frame_transform is not None:
+        weld_frame = plant.WeldFrames(
+            plant.get_body(plant.GetBodyIndices(robot_model)[0]).body_frame(),
+            plant.world_frame(),
+            weld_frame_transform,
+        )
 
     return robot_model, unique_id
 
