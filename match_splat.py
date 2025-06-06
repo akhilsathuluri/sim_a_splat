@@ -15,33 +15,27 @@ logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
 # %%
-# for lite6-1
-# urdf_location = (
-#     Path("./robot_description/xarm_description/lite6/urdf/lite6.urdf")
-#     .resolve()
-#     .__str__()
-# )
-# package_tag = "package://lite6"
-# match_object_name = "lite6-1"
-
-# for xarm6-2
+# --------------------------------------------
+# CHANGE TO CUSTOM ROBOT
 urdf_location = (
     Path("./robot_description/xarm_description/xarm6/urdf/xarm6_with_push_gripper.urdf")
     .resolve()
     .__str__()
 )
+# a tag for the object in the splat that is being matched
 match_object_name = "xarm6-2"
 package_tag = "package://xarm6"
-
 output_dir = (
     Path("assets/robots-scene-v2/masks" + f"/{match_object_name}/").resolve().__str__()
 )
-output_dir_path = Path(output_dir)
-output_dir_path.mkdir(parents=True, exist_ok=True)
 splat_path_string = "assets/robots-scene-v2/splatfacto/2024-12-06_150850/config.yml"
 robot_mesh_dir = Path("./robot_description/xarm_description/xarm6/").resolve()
+# --------------------------------------------
 
 # %%
+output_dir_path = Path(output_dir)
+output_dir_path.mkdir(parents=True, exist_ok=True)
+
 with open(urdf_location, "r") as file:
     urdf_content = file.read()
 
@@ -133,12 +127,13 @@ splat_pcd.points = o3d.utility.Vector3dVector(means)
 o3d.visualization.draw_plotly([splat_pcd])
 
 # %%
+# --------------------------------------------
+# CHANGE THESE VALUES TO CROP THE OBJECT TO BE MATCHED
 vol = o3d.visualization.SelectionPolygonVolume()
 vol.orthogonal_axis = "Z"
 vol.axis_min = -0.312
 vol.axis_max = 0.2
 
-# for xarm6-2
 # fmt: off
 polygon_bounds = o3d.utility.Vector3dVector([
     [0.3, -0.06, 0],
@@ -148,21 +143,9 @@ polygon_bounds = o3d.utility.Vector3dVector([
 ])
 vol.bounding_polygon = o3d.utility.Vector3dVector(polygon_bounds)
 
-# for lite6-1
-# fmt: off
-# polygon_bounds = o3d.utility.Vector3dVector([
-#     [0.089, -0.4, 0],
-#     [0.26, -0.4, 0],
-#     [0.26, -0.23, 0],
-#     [0.089, -0.23, 0]
-# ])
-# vol.bounding_polygon = o3d.utility.Vector3dVector(polygon_bounds)
-# fmt: on
-
 crop_robot = vol.crop_point_cloud(splat_pcd)
 o3d.visualization.draw_plotly([crop_robot])
-# o3d.visualization.draw_plotly([crop_robot, robot_pcd])
-
+# --------------------------------------------
 
 # %%
 np.save(output_dir + "/polygon_bounds.npy", polygon_bounds)

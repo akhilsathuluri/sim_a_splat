@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="divar113vhw">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.653809040497705 0.873145474662078 1.26418517603441"
+        rpy="0 0 0" />
+      <mass
+        value="0.548525050441065" />
+      <inertia
+        ixx="0.000727092400643311"
+        ixy="-2.93889571518898E-09"
+        ixz="2.57971209427987E-12"
+        iyy="0.000771951584231039"
+        iyz="-9.86794333018264E-06"
+        izz="0.00119444974126075" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://divar113vhw/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.964705882352941 0.964705882352941 0.952941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://divar113vhw/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="link1">
+    <inertial>
+      <origin
+        xyz="-0.000316041156602331 -0.0478633722185907 0.127801986519159"
+        rpy="0 0 0" />
+      <mass
+        value="0.922148821019917" />
+      <inertia
+        ixx="0.0034051953642706"
+        ixy="-1.78675785401642E-05"
+        ixz="7.15358834470091E-06"
+        iyy="0.00265325140752611"
+        iyz="0.000479908967384109"
+        izz="0.00211200002201519" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://divar113vhw/meshes/link1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://divar113vhw/meshes/link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1"
+    type="revolute">
+    <origin
+      xyz="0.65381 -1.2885 0.8759"
+      rpy="1.5708 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="link2">
+    <inertial>
+      <origin
+        xyz="0.0814670380277331 -0.0733606819301097 -4.40278635771563E-09"
+        rpy="0 0 0" />
+      <mass
+        value="0.903704144700498" />
+      <inertia
+        ixx="0.00166377737338398"
+        ixy="0.000469638811794735"
+        ixz="-4.29741160122483E-10"
+        iyy="0.0037079288523545"
+        iyz="-8.05868592057105E-10"
+        izz="0.00398041839495488" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://divar113vhw/meshes/link2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://divar113vhw/meshes/link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint2"
+    type="revolute">
+    <origin
+      xyz="0 -0.12475 0.1461"
+      rpy="0 0 0" />
+    <parent
+      link="link1" />
+    <child
+      link="link2" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="link3">
+    <inertial>
+      <origin
+        xyz="0.0847506963294419 -6.18839712354102E-05 0.0281660258771604"
+        rpy="0 0 0" />
+      <mass
+        value="0.73697981164395" />
+      <inertia
+        ixx="0.00196161935442481"
+        ixy="8.68381674460751E-07"
+        ixz="-0.000380640160220432"
+        iyy="0.00248763473683309"
+        iyz="2.05179353987983E-06"
+        izz="0.00158868349585124" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://divar113vhw/meshes/link3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.537254901960784 0.537254901960784 0.537254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://divar113vhw/meshes/link3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint3"
+    type="revolute">
+    <origin
+      xyz="0.18375 -0.08225 0"
+      rpy="1.5708 0 0" />
+    <parent
+      link="link2" />
+    <child
+      link="link3" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="link4">
+    <inertial>
+      <origin
+        xyz="0.0392266384247651 7.00211963089448E-05 0.0910530278085758"
+        rpy="0 0 0" />
+      <mass
+        value="0.479741395262082" />
+      <inertia
+        ixx="0.000901136028269247"
+        ixy="-5.02969169913357E-07"
+        ixz="-0.000325960685618387"
+        iyy="0.00163707674119388"
+        iyz="-4.25583290565581E-07"
+        izz="0.00119911552577643" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://divar113vhw/meshes/link4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.537254901960784 0.537254901960784 0.537254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://divar113vhw/meshes/link4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint4"
+    type="revolute">
+    <origin
+      xyz="0.10025 0 0.10965"
+      rpy="0 0 0" />
+    <parent
+      link="link3" />
+    <child
+      link="link4" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="link5">
+    <inertial>
+      <origin
+        xyz="0.0606799215849343 -0.000157629919758984 -0.000258127935909958"
+        rpy="0 0 0" />
+      <mass
+        value="0.150507301935239" />
+      <inertia
+        ixx="0.000124630145817751"
+        ixy="1.3271439518419E-06"
+        ixz="2.41346484411778E-06"
+        iyy="0.00035201610759767"
+        iyz="5.42848147543377E-07"
+        izz="0.00035187579723095" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://divar113vhw/meshes/link5.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://divar113vhw/meshes/link5.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint5"
+    type="revolute">
+    <origin
+      xyz="0.10965 0 0.1075"
+      rpy="2.3618 0 0" />
+    <parent
+      link="link4" />
+    <child
+      link="link5" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+</robot>

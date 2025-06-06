@@ -5,12 +5,12 @@ import logging
 import time
 from tqdm import tqdm
 from pathlib import Path
-from sim_a_splat.env.xarm.xarm_env import XarmSimEnv
+from sim_a_splat.env.manipulator.manipulator_env import ManipulatorSimEnv
 from sim_a_splat.splat.splat_handler import SplatHandler
 
 
 # %%
-class SplatEnv(XarmSimEnv):
+class SplatEnv(ManipulatorSimEnv):
     def __init__(
         self,
         visualise_sim_flag=True,
@@ -33,7 +33,7 @@ class SplatEnv(XarmSimEnv):
         )
         super(SplatEnv, self).load_model()
         self.ch = self._setup_splats()
-        # dafault fixed cam pose for xarm6-1 robot
+        # TODO: default fixed cam pose for xarm6-1 robot
         cam_pose_01 = tf.SE3(
             wxyz_xyz=np.concatenate(
                 (

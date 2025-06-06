@@ -9,8 +9,17 @@ Each environment follows a common interface for consistent usage across differen
 and tasks.
 """
 
-from .xarm.xarm_env import XarmSimEnv
-from .splat.splat_env import SplatEnv
+# from .xarm.xarm_env import XarmSimEnv
+# from .splat.splat_env import SplatEnv
 
 
-__all__ = ["XarmSimEnv", "SplatEnv"]
+# __all__ = ["XarmSimEnv", "SplatEnv"]
+
+# from gymnasium.envs.registration import register
+
+# register(
+#     id="ManipulatorSimEnv-v0",
+#     entry_point="sim_a_splat.env.manipulator.manipulator_env:ManipulatorSimEnv",
+# )
+
+from sim_a_splat.env.manipulator.manipulator_env import ManipulatorSimEnv
