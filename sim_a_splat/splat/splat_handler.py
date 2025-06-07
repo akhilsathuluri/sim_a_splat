@@ -156,7 +156,11 @@ class SplatHandler:
             tmp_urdf_location = tmp_urdf_file.name
 
         robot = URDF.load(tmp_urdf_location)
-        fk = robot.visual_trimesh_fk()
+        joint_config = np.load(self.masks_dir + "/joint_config.npy")
+        actuated_joint_names = [
+            robot.actuated_joints[ii].name for ii in range(len(robot.actuated_joints))
+        ]
+        fk = robot.visual_trimesh_fk(cfg=dict(zip(actuated_joint_names, joint_config)))
         translist = list(fk.values())
 
         meshes = []

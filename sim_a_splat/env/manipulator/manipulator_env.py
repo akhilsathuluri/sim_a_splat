@@ -29,7 +29,6 @@ from drake import (
 )
 
 from sim_a_splat.env.manipulator.manipulator_sim_utils import (
-    PoseToConfig,
     AddRobotModel,
     add_env_objects,
     MakeHardwareStation,
@@ -83,43 +82,6 @@ class ManipulatorSimEnv(gym.Env):
                 ),
             }
         )
-
-        # self.observation_space = gym.spaces.Dict(
-        #     {
-        #         "eef_pos": gym.spaces.Box(
-        #             low=-np.inf,
-        #             high=np.inf,
-        #             shape=(3,),
-        #             dtype=np.float32,
-        #         ),
-        #         "eef_quat": gym.spaces.Box(
-        #             low=-np.inf,
-        #             high=np.inf,
-        #             shape=(4,),
-        #             dtype=np.float32,
-        #         ),
-        #         "eef_pos_vel": gym.spaces.Box(
-        #             low=-np.inf,
-        #             high=np.inf,
-        #             shape=(3,),
-        #             dtype=np.float32,
-        #         ),
-        #         "eef_rot_vel": gym.spaces.Box(
-        #             low=-np.inf,
-        #             high=np.inf,
-        #             shape=(3,),
-        #             dtype=np.float32,
-        #         ),
-        #     }
-        # )
-
-        # self.action_space = gym.spaces.Box(
-        #     low=-np.inf,
-        #     high=np.inf,
-        #     shape=(3,),
-        #     dtype=np.float32,
-        # )
-
         self.action_space = gym.spaces.Box(
             low=-np.pi,
             high=np.pi,
@@ -153,7 +115,6 @@ class ManipulatorSimEnv(gym.Env):
         plant.Finalize()
         self.nq = plant.num_positions(self.robot_model_instance)
         self.end_effector_body = plant.GetBodyByName(self.eef_link_name)
-        # self.end_effector_frame = self.end_effector_body.body_frame()
         station = builder.AddSystem(
             MakeHardwareStation(
                 self.time_step,
@@ -164,9 +125,6 @@ class ManipulatorSimEnv(gym.Env):
                 uid=self.uid,
             )
         )
-        # pose2config = builder.AddSystem(
-        #     PoseToConfig(plant, self.end_effector_frame, self.nq)
-        # )
         builder.Connect(
             plant.get_state_output_port(self.robot_model_instance),
             station.GetInputPort("robot_estimated_state"),
@@ -176,13 +134,6 @@ class ManipulatorSimEnv(gym.Env):
             station.GetOutputPort("robot_torque_commanded"),
             plant.get_actuation_input_port(self.robot_model_instance),
         )
-        # builder.Connect(
-        #     pose2config.get_output_port(), station.GetInputPort("robot_state_desired")
-        # )
-        # builder.ExportInput(pose2config.GetInputPort("pose"), "desired_pose")
-        # builder.ExportOutput(
-        #     pose2config.GetOutputPort("config"), "desired_joint_position"
-        # )
         builder.ExportInput(
             station.GetInputPort("robot_state_desired"), "desired_robot_pos"
         )
@@ -193,16 +144,12 @@ class ManipulatorSimEnv(gym.Env):
         self.plant = plant
         self.diagram = builder.Build()
         self.simulator = Simulator(self.diagram)
-        # self.pose_input_port = self.simulator.get_system().GetInputPort("desired_pose")
         self.robot_pos_input_port = self.simulator.get_system().GetInputPort(
             "desired_robot_pos"
         )
         self.state_output_port = self.simulator.get_system().GetOutputPort(
             "system_state_output_port"
         )
-        # self.desired_joint_position = self.simulator.get_system().GetOutputPort(
-        #     "desired_joint_position"
-        # )
 
     def reset(self, seed: Optional[int] = None, reset_to_state=None):
         super().reset(seed=seed)
@@ -224,10 +171,6 @@ class ManipulatorSimEnv(gym.Env):
                 ),
                 "goal_pos": np.array([0.475, 0.0, 0.2, 0.78539816]),
             }
-        # self.pose_input_port.FixValue(
-        #     self.diagram_context,
-        #     RigidTransform(RollPitchYaw(3.14, 0, 0), reset_to_state["eef_pos"][:3]),
-        # )
         jpos = reset_to_state["robot_pos"]
         self.robot_pos_input_port.FixValue(self.diagram_context, jpos)
 
@@ -259,8 +202,6 @@ class ManipulatorSimEnv(gym.Env):
             self.publish_tblock_marker(
                 self.goal_pose_transform, color=Rgba(0, 1, 0, 0.2)
             )
-
-        # jpos = self.desired_joint_position.Eval(self.diagram_context)
         self.plant.SetPositions(
             self.plant_context,
             self.robot_model_instance,
@@ -274,7 +215,6 @@ class ManipulatorSimEnv(gym.Env):
         self.simulator.Initialize()
 
         observation = self._get_obs()
-        # info = self._get_info()
         return observation
 
     def set_joint_vector_in_drake(self, pos):
@@ -326,9 +266,6 @@ class ManipulatorSimEnv(gym.Env):
             self.lcm.Publish("DRAKE_VIEWER_DRAW", msg.encode())
 
     def step(self, action, no_obs=False):
-        # self.pose_input_port.FixValue(
-        #     self.diagram_context, RigidTransform(RollPitchYaw(3.14, 0, 0), action)
-        # )
         self.robot_pos_input_port.FixValue(self.diagram_context, action)
         try:
             self.simulator.AdvanceTo(self.simulator_context.get_time() + self.time_step)
@@ -339,38 +276,9 @@ class ManipulatorSimEnv(gym.Env):
         reward = self._compute_reward(info)
         terminated = self._is_done(info, reward)
         truncated = False
-        # if terminated:
-        #     end_location = np.array([0.25, 0.3, 0.2])
-        #     self.publish_robot_end_location(end_location=end_location)
-        #     if type(observation) is tuple:
-        #         eef_goal_dist = np.linalg.norm(observation[0][:2] - end_location[:2])
-        #     else:
-        #         eef_goal_dist = np.linalg.norm(observation["eef_pos"] - end_location)
-        #     if eef_goal_dist > 0.008:
-        #         terminated = False
-        # else:
-        #     try:
-        #         self.meshcat.Delete("eef_goal")
-        #     except:
-        #         pass
-
         return observation, reward, terminated, truncated, info
 
     def _get_obs(self):
-        # eef_pose = self.plant.EvalBodyPoseInWorld(
-        #     self.plant_context, self.end_effector_body
-        # )
-        # eef_pos = eef_pose.translation()
-        # eef_quat = eef_pose.rotation().ToQuaternion().wxyz()
-        # eef_vel = self.plant.EvalBodySpatialVelocityInWorld(
-        #     self.plant_context, self.end_effector_body
-        # )
-        # obs = {
-        #     "eef_pos": eef_pos,
-        #     "eef_quat": eef_quat,
-        #     "eef_pos_vel": eef_vel.translational(),
-        #     "eef_rot_vel": eef_vel.rotational(),
-        # }
         robot_state = self.plant.get_state_output_port(self.robot_model_instance).Eval(
             self.plant_context
         )
@@ -387,12 +295,6 @@ class ManipulatorSimEnv(gym.Env):
         return desired_eef_pose.translation()
 
     def _get_info(self):
-        # robot_state = self.plant.get_state_output_port(self.robot_model_instance).Eval(
-        #     self.plant_context
-        # )
-        # robot_pos = robot_state[: self.nq]
-        # robot_vel = robot_state[self.nq :]
-
         eef_pose = self.plant.EvalBodyPoseInWorld(
             self.plant_context, self.end_effector_body
         )
@@ -401,13 +303,6 @@ class ManipulatorSimEnv(gym.Env):
         eef_vel = self.plant.EvalBodySpatialVelocityInWorld(
             self.plant_context, self.end_effector_body
         )
-        # obs = {
-        #     "eef_pos": eef_pos,
-        #     "eef_quat": eef_quat,
-        #     "eef_pos_vel": eef_vel.translational(),
-        #     "eef_rot_vel": eef_vel.rotational(),
-        # }
-
         if self.env_objects_flag:
             block_state = self.plant.get_state_output_port(
                 self.plant.GetModelInstanceByName("tblock_paper")
@@ -416,8 +311,6 @@ class ManipulatorSimEnv(gym.Env):
             block_pose = block_state[:7]
             block_vel = block_state[7:]
             info = {
-                # "robot_pos": robot_pos,
-                # "robot_vel": robot_vel,
                 "eef_pos": eef_pos,
                 "eef_quat": eef_quat,
                 "eef_pos_vel": eef_vel.translational(),
@@ -429,8 +322,6 @@ class ManipulatorSimEnv(gym.Env):
             return info
         else:
             return {
-                # "robot_pos": robot_pos,
-                # "robot_vel": robot_vel,
                 "eef_pos": eef_pos,
                 "eef_quat": eef_quat,
                 "eef_pos_vel": eef_vel.translational(),
@@ -460,30 +351,6 @@ class ManipulatorSimEnv(gym.Env):
         if abs(reward) < 0.02:
             return True
         return False
-
-    # def _set_to_state(self, state):
-    #     self.plant.SetPositions(
-    #         self.plant_context,
-    #         self.robot_model_instance,
-    #         state["robot_pos"],
-    #     )
-    #     self.plant.SetVelocities(
-    #         self.plant_context,
-    #         self.robot_model_instance,
-    #         np.zeros(len(state["robot_pos"])),
-    #     )
-    #     if self.env_objects_flag:
-    #         self.plant.SetPositions(
-    #             self.plant_context,
-    #             self.plant.GetModelInstanceByName("tblock_paper"),
-    #             state["block_pose"],
-    #         )
-    #         self.plant.SetVelocities(
-    #             self.plant_context,
-    #             self.plant.GetModelInstanceByName("tblock_paper"),
-    #             np.zeros(6),
-    #         )
-    #     self.simulator_context.SetTime(state["timestamp"])
 
     def _generate_loader_msg(self):
         loader_msg = lcmt_viewer_load_robot()

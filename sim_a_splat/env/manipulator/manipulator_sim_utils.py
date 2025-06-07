@@ -65,9 +65,6 @@ class PoseToConfig(LeafSystem):
         prog = ik.prog()
         result = Solve(prog)
         q_desired = result.GetSolution(ik.q())
-
-        # when free block
-        # output.set_value(q_desired[:6])
         output.set_value(q_desired[: self.out_port_len])
 
 
@@ -82,11 +79,9 @@ def add_ground_with_friction(plant):
         friction=CoulombFriction(static_friction=1.0, dynamic_friction=1.0),
         properties=proximity_properties_ground,
     )
-    # taken from: https://github.com/vincekurtz/drake_ddp/blob/b4b22a55448121153f992cae453236f7f5891b23/panda_fr3.py#L79
     AddCompliantHydroelasticPropertiesForHalfSpace(
         slab_thickness, hydroelastic_modulus, proximity_properties_ground
     )
-
     plant.RegisterCollisionGeometry(
         plant.world_body(),
         RigidTransform(),
@@ -133,7 +128,6 @@ def AddRobotModel(
     urdf_utils.modify_meshes(in_mesh_format=".STL")
     logging.warning("removing collision tags!")
     urdf_utils.remove_collisions_except([])
-    # unique_id = urdf_utils.make_model_unique()
     unique_id = ""
     urdf_utils.add_joint_limits()
     urdf_utils.add_actuation_tags()
