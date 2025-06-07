@@ -34,7 +34,6 @@ task_assets_path = (
 ).__str__()
 task_assets_name = "tblock_paper.obj"
 
-
 # package_path = (
 #     Path(__file__).resolve().parent.parent.parent / "sim_a_splat/robot_description/"
 # ).__str__()
