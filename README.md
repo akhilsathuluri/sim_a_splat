@@ -24,7 +24,7 @@ Once the Gaussian splat is trained and placed in the assets directory, run the `
 Now run the demo code to visualise the example. Two browser windows can be opened beside each other, one for [viser](https://github.com/nerfstudio-project/viser), and another for the [meshcat visualiser](https://drake.mit.edu/doxygen_cxx/classdrake_1_1geometry_1_1_meshcat.html) from Drake. 
 
 ```
-pixi run python demo_pusht_splat.py 
+pixi r python examples/demo_pusht_splat.py
 ```
 
 Upon running, you should see an interface similar to the one shown below, 
@@ -35,11 +35,6 @@ The demo uses Microsoft Edge browser with a split window functionality to view t
 
 ### Next steps
 The "digital twin" environment is wrapped as an env compatible with [Gymnasium](https://github.com/Farama-Foundation/Gymnasium), meaning, that the Guassian splat can be used to perform training or for collecting data using the typical RL pipeline. 
-
-### Common issues
-> In some cases an older version of `viser (0.2.7)` since that is the locked version by `nerfstudio (1.1.5)` resulting in an error
-
-This is now fixed by installing the fork of nerfstudio that ports the updated viser version.
 
 ### Acknowledgements
 - The repo uses the code from [splatnav](https://github.com/chengine/splatnav) for loading and viewing the Gaussian splat.
