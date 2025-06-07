@@ -2,16 +2,13 @@
 import sys
 from pathlib import Path
 import time
-from pydrake.all import Quaternion, RotationMatrix, RollPitchYaw
+import numpy as np
+import viser.transforms as tf
 
 sys.path.append(Path(__file__).resolve().parent.parent.__str__())
 from sim_a_splat.env.manipulator.manipulator_env import ManipulatorSimEnv
-
-from sim_a_splat.env.manipulator.manipulator_eef_wrapper import ManipulatorEEFWrapper
 from sim_a_splat.env.splat.splat_env_wrapper import SplatEnvWrapper
-import numpy as np
 
-import viser.transforms as tf
 
 # %%
 

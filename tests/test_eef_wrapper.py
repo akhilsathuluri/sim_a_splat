@@ -45,7 +45,13 @@ manipulator_env = ManipulatorSimEnv(
     num_dof=num_dof,
 )
 
-obs = manipulator_env.reset(reset_to_state={"robot_pos": [0.0] * num_dof})
+obs = manipulator_env.reset(
+    reset_to_state={
+        "robot_pos": [0.0] * num_dof,
+        "block_pos": [0.0, 0.0, 0.0, 0.0],
+        "goal_pos": [0.0, 0.0, 0.0, 0.0],
+    }
+)
 info = manipulator_env._get_info()
 
 # %%
