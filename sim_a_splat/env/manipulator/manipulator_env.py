@@ -215,9 +215,6 @@ class ManipulatorSimEnv(gym.Env):
         )
         if reset_to_state is None:
             reset_to_state = {
-                # "eef_pos": self.np_random.uniform(
-                #     low=np.array([0.25, -0.3, 0.2]), high=np.array([0.65, 0.3, 0.2])
-                # ),
                 "robot_pos": self.np_random.uniform(
                     low=-np.pi, high=np.pi, size=self.nq
                 ),

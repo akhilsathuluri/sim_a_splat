@@ -165,6 +165,7 @@ class SplatEnvWrapper(gym.Wrapper):
         # action[2] = 0.2
         obs_in, reward, terminated, truncated, info_in = self.env.step(action)
         draw_msg = self.env._generate_draw_msg()
+        # breakpoint()
         self.splat_handler.draw_handler(draw_msg)
         observation = None
         if not noobs:
