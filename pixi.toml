@@ -24,7 +24,7 @@ libxcrypt = ">=4.4.36,<5"
 [pypi-dependencies]
 torch = ">=2.7.0, <3"
 torchvision = ">=0.22.0, <0.23"
-nerfstudio = { git = "git+https://github.com/akhilsathuluri/nerfstudio.git"}
+nerfstudio = { path = "../nerfstudio", editable = true }
 amo-urdf = { git = "git+https://github.com/ami-iit/amo_urdf.git" }
 sak = { path = "../sak", editable = true }
 drake = ">=1.38.0, <2"

@@ -46,13 +46,13 @@ import gymnasium as gym
 class ManipulatorSimEnv(gym.Env):
     def __init__(
         self,
-        env_objects=True,
-        visualise_flag=True,
-        eef_link_name=None,
-        package_path=None,
-        package_name=None,
-        urdf_name=None,
-        num_dof=None,
+        env_objects: bool = True,
+        visualise_flag: bool = True,
+        eef_link_name: str = None,
+        package_path: str = None,
+        package_name: str = None,
+        urdf_name: str = None,
+        num_dof: int = None,
     ):
         self.active_meshcat = False
         self.time_step = 1e-2
@@ -277,8 +277,8 @@ class ManipulatorSimEnv(gym.Env):
         self.simulator.Initialize()
 
         observation = self._get_obs()
-        info = self._get_info()
-        return observation, info
+        # info = self._get_info()
+        return observation
 
     def set_joint_vector_in_drake(self, pos):
         self.qpos = pos
