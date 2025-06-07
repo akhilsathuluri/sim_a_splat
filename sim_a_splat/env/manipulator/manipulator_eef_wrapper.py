@@ -54,19 +54,19 @@ class ManipulatorEEFWrapper(gym.Wrapper):
         eef_transform = RigidTransform(
             RotationMatrix(RollPitchYaw(eefpose[3:])), eefpose[:3]
         )
-        self.end_effector_frame = self.env.end_effector_body.body_frame()
-        ik = InverseKinematics(self.env.plant, self.env.plant_context)
+        self.end_effector_frame = self.unwrapped.end_effector_body.body_frame()
+        ik = InverseKinematics(self.unwrapped.plant, self.unwrapped.plant_context)
         ik.AddPositionConstraint(
             frameB=self.end_effector_frame,
             p_BQ=[0, 0, 0],
-            frameA=self.env.plant.world_frame(),
+            frameA=self.unwrapped.plant.world_frame(),
             p_AQ_lower=eef_transform.translation() - 1e-4,
             p_AQ_upper=eef_transform.translation() + 1e-4,
         )
         ik.AddOrientationConstraint(
             frameAbar=self.end_effector_frame,
             R_AbarA=eef_transform.rotation(),
-            frameBbar=self.env.plant.world_frame(),
+            frameBbar=self.unwrapped.plant.world_frame(),
             R_BbarB=RotationMatrix(),
             theta_bound=1e-4,
         )
@@ -77,7 +77,8 @@ class ManipulatorEEFWrapper(gym.Wrapper):
         result = Solve(prog)
         if not result.is_success():
             raise RuntimeError("Inverse kinematics failed")
-        return result.GetSolution(ik.q())
+        # TODO: Handle IK when env_objects are present
+        return result.GetSolution(ik.q())[: self.unwrapped.num_dof]
 
     def step(self, action):
         eef_pos = action["eef_pos"]

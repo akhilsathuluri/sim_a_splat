@@ -77,9 +77,9 @@ class SplatEnvWrapper(gym.Wrapper):
             splat_assets_path,
             match_object_name,
             splat_config_name,
-            self.env.package_path,
-            self.env.package_name,
-            self.env.urdf_name,
+            self.unwrapped.package_path,
+            self.unwrapped.package_name,
+            self.unwrapped.urdf_name,
             task_assets_path=task_assets_path,
             task_assets_name=task_assets_name,
         )
@@ -94,12 +94,12 @@ class SplatEnvWrapper(gym.Wrapper):
         return client[0]
 
     def reset(self, seed: Optional[int] = None, reset_to_state=None):
-        self.env.reset(seed=seed, reset_to_state=reset_to_state)
-        self.draw_msg = self.env._generate_draw_msg()
+        self.unwrapped.reset(seed=seed, reset_to_state=reset_to_state)
+        self.draw_msg = self.unwrapped._generate_draw_msg()
         self.splat_handler.draw_handler(self.draw_msg)
-        if self.env.visualize_robot_flag:
+        if self.unwrapped.visualize_robot_flag:
             self.env.render()
-        return self._get_obs()
+        return self.unwrapped._get_obs()
 
     def get_moving_camera_poses(self, msg):
         moving_camera_poses = []
@@ -119,17 +119,17 @@ class SplatEnvWrapper(gym.Wrapper):
 
     def step(self, action, noobs=False):
         obs_in, reward, terminated, truncated, info_in = self.env.step(action)
-        draw_msg = self.env._generate_draw_msg()
+        draw_msg = self.unwrapped._generate_draw_msg()
         self.splat_handler.draw_handler(draw_msg)
         observation = None
         if not noobs:
-            if self.env.visualize_robot_flag:
+            if self.unwrapped.visualize_robot_flag:
                 self.env.render()
             observation = self._get_obs()
         return observation, reward, terminated, truncated, info_in
 
     def _get_obs(self):
-        obs = self.env._get_obs()
+        obs = self.unwrapped._get_obs()
         img_out = self.render()
         for ii in range(len(img_out)):
             img_out[ii] = np.moveaxis(img_out[ii], -1, 0)
@@ -159,7 +159,7 @@ class SplatEnvWrapper(gym.Wrapper):
 
     def close(self):
         self.splat_handler.server.stop()
-        self.env.close()
+        self.unwrapped.close()
 
 
 # %%

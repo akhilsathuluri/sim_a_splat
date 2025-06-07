@@ -5,7 +5,6 @@ import time
 
 sys.path.append(Path(__file__).resolve().parent.parent.__str__())
 from sim_a_splat.env.manipulator.manipulator_env import ManipulatorSimEnv
-import numpy as np
 
 package_path = (
     Path(__file__).resolve().parent.parent.parent

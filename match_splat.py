@@ -62,14 +62,9 @@ with tempfile.NamedTemporaryFile(delete=False, suffix=".urdf") as tmp_urdf_file:
 
 # %%
 robot = URDF.load(tmp_urdf_location)
-# actuated_joints = []
-# actuated_joints = robot.actuated_joints
 actuated_joint_names = [
     robot.actuated_joints[ii].name for ii in range(len(robot.actuated_joints))
 ]
-# for joint in robot.joints:
-#     if joint.joint_type != "fixed":
-#         actuated_joints.append(joint.name)
 joint_config = np.array([0.2, 3.0, 3.14, 0, 0])
 np.save(output_dir + "/joint_config.npy", joint_config)
 cfg = dict(zip(actuated_joint_names, joint_config))

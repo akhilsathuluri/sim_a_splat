@@ -41,9 +41,6 @@ class SplatHandler:
         self.masks_dir = (
             Path(f"{splat_assets_path}/masks/{match_object_name}/").resolve().__str__()
         )
-        # self.robot_mesh_dir = (
-        #     (Path(splat_assets_path).parent.parent).resolve().__str__()
-        # )
         self._load_saved_masks()
         self._load_saved_splats(
             path=f"{splat_assets_path}/splatfacto/{splat_config_name}"
@@ -143,7 +140,6 @@ class SplatHandler:
             self.splat_links_handler.append(splat_link_handler)
 
     def _add_robot_meshes(self, package_path=None, package_name=None, urdf_name=None):
-        # robot_model = self.instance_uid.split("-")[0]
         urdf_location = self.robot_description_dir + f"urdf/{urdf_name}"
         with open(urdf_location, "r") as file:
             urdf_content = file.read()
@@ -173,7 +169,6 @@ class SplatHandler:
                     meshes.append(mesh)
                     colors.append(visual.material.color)
 
-        # TODO: Handle default FK transform used in segmentation here
         self.mesh_trimeshs = []
         self.mesh_frame_handles = []
         self.fk_tf = []
@@ -336,7 +331,6 @@ class SplatHandler:
                 position=cam_poses[ii].translation(),
             )
             output_imgs.append(np.array(img))
-
         return output_imgs
 
 
