@@ -14,13 +14,13 @@ from pydrake.all import (
     AddCompliantHydroelasticProperties,
     HalfSpace,
     Cylinder,
-    PlanarJoint,
     RobotDiagramBuilder,
     InverseDynamicsController,
     StateInterpolatorWithDiscreteDerivative,
     Frame,
-    SpatialInertia,
-    UnitInertia,
+    ContactModel,
+    CollisionFilterDeclaration,
+    GeometrySet,
 )
 import numpy as np
 from sak.URDFutils import URDFutils
@@ -29,7 +29,7 @@ import logging
 
 
 class PoseToConfig(LeafSystem):
-    def __init__(self, plant: MultibodyPlant, frame: Frame):
+    def __init__(self, plant: MultibodyPlant, frame: Frame, num_dof: int):
         LeafSystem.__init__(self)
         self.plant = plant
         self.frame = frame
@@ -38,7 +38,7 @@ class PoseToConfig(LeafSystem):
             "pose",
             AbstractValue.Make(RigidTransform()),
         )
-        self.out_port_len = 6
+        self.out_port_len = num_dof
         self.DeclareVectorOutputPort(
             "config",
             self.out_port_len,
@@ -65,9 +65,6 @@ class PoseToConfig(LeafSystem):
         prog = ik.prog()
         result = Solve(prog)
         q_desired = result.GetSolution(ik.q())
-
-        # when free block
-        # output.set_value(q_desired[:6])
         output.set_value(q_desired[: self.out_port_len])
 
 
@@ -82,11 +79,9 @@ def add_ground_with_friction(plant):
         friction=CoulombFriction(static_friction=1.0, dynamic_friction=1.0),
         properties=proximity_properties_ground,
     )
-    # taken from: https://github.com/vincekurtz/drake_ddp/blob/b4b22a55448121153f992cae453236f7f5891b23/panda_fr3.py#L79
     AddCompliantHydroelasticPropertiesForHalfSpace(
         slab_thickness, hydroelastic_modulus, proximity_properties_ground
     )
-
     plant.RegisterCollisionGeometry(
         plant.world_body(),
         RigidTransform(),
@@ -123,32 +118,57 @@ def AddRobotModel(
     package_name,
     urdf_name,
     scene_graph=None,
-    weld_frame_transform=None,
+    weld_frame_transform=RigidTransform(),
 ):
     if scene_graph is None:
         parser = Parser(plant, scene_graph)
     else:
         parser = Parser(plant)
     urdf_utils = URDFutils(package_path, package_name, urdf_name)
-    urdf_utils.modify_meshes()
+    urdf_utils.modify_meshes(in_mesh_format=".STL")
     logging.warning("removing collision tags!")
     urdf_utils.remove_collisions_except([])
-    # unique_id = urdf_utils.make_model_unique()
     unique_id = ""
+    urdf_utils.add_joint_limits()
     urdf_utils.add_actuation_tags()
     _, temp_urdf = urdf_utils.get_modified_urdf()
     abs_path = Path(package_path).resolve().__str__()
     parser.package_map().Add(package_name.split("/")[0], abs_path + "/" + package_name)
     robot_model = parser.AddModels(temp_urdf.name)[0]
-
-    # if weld_frame_transform is not None:
-    #     weld_frame = plant.WeldFrames(
-    #         plant.get_body(plant.GetBodyIndices(robot_model)[0]).body_frame(),
-    #         plant.world_frame(),
-    #         weld_frame_transform,
-    #     )
+    try:
+        weld_frame = plant.WeldFrames(
+            plant.get_body(plant.GetBodyIndices(robot_model)[0]).body_frame(),
+            plant.world_frame(),
+            weld_frame_transform,
+        )
+    except RuntimeError as e:
+        logging.error(
+            f"Failed to weld frame for {robot_model} with error: {e}. "
+            "Ensure the weld_frame_transform is correct."
+        )
 
     return robot_model, unique_id
+
+
+def configure_contacts(plant, eef_link_name, scene_graph, robot_model_instance):
+    plant.set_contact_model(ContactModel.kHydroelasticsOnly)
+    add_ground_with_friction(plant)
+    add_soft_collisions(plant, eef_link_name=eef_link_name)
+    plant.set_penetration_allowance(1e-5)
+    collision_filter_manager = scene_graph.collision_filter_manager()
+    collision_filter_manager.Apply(
+        CollisionFilterDeclaration().ExcludeBetween(
+            GeometrySet(
+                plant.GetCollisionGeometriesForBody(
+                    plant.GetBodyByName(
+                        eef_link_name,
+                        robot_model_instance,
+                    )
+                )
+            ),
+            GeometrySet(plant.GetCollisionGeometriesForBody(plant.world_body())),
+        )
+    )
 
 
 def add_env_objects(plant, scene_graph):
@@ -190,16 +210,15 @@ def MakeHardwareStation(
     robot_controller = builder.AddSystem(
         InverseDynamicsController(
             controller_plant,
-            kp=[400.0] * control_plant_pos,
+            kp=[100.0] * control_plant_pos,
             ki=[0.0] * control_plant_pos,
-            kd=[40.0] * control_plant_pos,
+            kd=[20.0] * control_plant_pos,
             has_reference_acceleration=False,
         )
     )
     builder.ExportInput(
         robot_controller.get_input_port_estimated_state(), "robot_estimated_state"
     )
-    # builder.ExportOutput(robot_controller.get_output_port(), "robot_torque_commanded")
     builder.ExportOutput(
         robot_controller.GetOutputPort("actuation"), "robot_torque_commanded"
     )

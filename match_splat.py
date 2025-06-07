@@ -2,50 +2,52 @@
 import open3d as o3d
 import numpy as np
 import torch
-from pathlib import Path
-import viser.transforms as tf
-from sim_a_splat.splat.splat_utils import GSplatLoader
-from copy import deepcopy as pycopy
-from urchin import URDF
 import logging
-import json
 import tempfile
+import viser.transforms as tf
+from pathlib import Path
+from sim_a_splat.splat.splat_utils import GSplatLoader
+from urchin import URDF
+from copy import deepcopy as pycopy
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
 # %%
-# for lite6-1
+# --------------------------------------------
+# CHANGE TO CUSTOM ROBOT
 # urdf_location = (
-#     Path("./robot_description/xarm_description/lite6/urdf/lite6.urdf")
+#     Path("./robot_description/xarm_description/xarm6/urdf/xarm6_with_push_gripper.urdf")
 #     .resolve()
 #     .__str__()
 # )
-# package_tag = "package://lite6"
-# match_object_name = "lite6-1"
+# # a tag for the object in the splat that is being matched
+# match_object_name = "xarm6-2"
+# package_tag = "package://xarm6"
+# output_dir = (
+#     Path("assets/robots-scene-v2/masks" + f"/{match_object_name}/").resolve().__str__()
+# )
+# splat_path_string = "assets/robots-scene-v2/splatfacto/2024-12-06_150850/config.yml"
+# robot_mesh_dir = Path("./robot_description/xarm_description/xarm6/").resolve()
 
-# for xarm6-2
 urdf_location = (
-    Path("./robot_description/xarm_description/xarm6/urdf/xarm6_with_push_gripper.urdf")
-    .resolve()
-    .__str__()
+    Path("./robot_description/divar113vhw/urdf/divar113vhw.urdf").resolve().__str__()
 )
-match_object_name = "xarm6-2"
-package_tag = "package://xarm6"
-
+match_object_name = "divar113vhw"
+package_tag = "package://divar113vhw"
 output_dir = (
-    Path("assets/robots-scene-v2/masks" + f"/{match_object_name}/").resolve().__str__()
+    Path("assets/divar113vhw/masks" + f"/{match_object_name}/").resolve().__str__()
 )
+splat_path_string = "assets/divar113vhw/splatfacto/2025-06-03_191520/config.yml"
+robot_mesh_dir = Path("./robot_description/divar113vhw/").resolve()
+
+# --------------------------------------------
+
+# %%
 output_dir_path = Path(output_dir)
 output_dir_path.mkdir(parents=True, exist_ok=True)
-splat_path_string = "assets/robots-scene-v2/splatfacto/2024-12-06_150850/config.yml"
-robot_mesh_dir = Path("./robot_description/xarm_description/xarm6/").resolve()
-
-# %%
 with open(urdf_location, "r") as file:
     urdf_content = file.read()
-
-# %%
 urdf_content = urdf_content.replace(
     package_tag,
     f"{robot_mesh_dir}",
@@ -60,12 +62,12 @@ with tempfile.NamedTemporaryFile(delete=False, suffix=".urdf") as tmp_urdf_file:
 
 # %%
 robot = URDF.load(tmp_urdf_location)
-actuated_joints = []
-for joint in robot.joints:
-    if joint.joint_type != "fixed":
-        actuated_joints.append(joint.name)
-joint_config = [0] * 6 + [0.85] * 6
-cfg = dict(zip(actuated_joints, joint_config))
+actuated_joint_names = [
+    robot.actuated_joints[ii].name for ii in range(len(robot.actuated_joints))
+]
+joint_config = np.array([0.2, 3.0, 3.14, 0, 0])
+np.save(output_dir + "/joint_config.npy", joint_config)
+cfg = dict(zip(actuated_joint_names, joint_config))
 translist = robot.visual_geometry_fk(cfg)
 
 # %%
@@ -135,33 +137,36 @@ o3d.visualization.draw_plotly([splat_pcd])
 # %%
 vol = o3d.visualization.SelectionPolygonVolume()
 vol.orthogonal_axis = "Z"
-vol.axis_min = -0.312
-vol.axis_max = 0.2
 
-# for xarm6-2
+# --------------------------------------------
+# CHANGE THESE VALUES TO CROP THE OBJECT TO BE MATCHED
+# vol.axis_min = -0.312
+# vol.axis_max = 0.2
+# # fmt: off
+# polygon_bounds = o3d.utility.Vector3dVector([
+#     [0.3, -0.06, 0],
+#     [0.49, -0.06, 0],
+#     [0.49, 0.18, 0],
+#     [0.3, 0.18, 0]
+# ])
+# # fmt: on
+
+vol.axis_min = -0.3
+vol.axis_max = 0.1
 # fmt: off
 polygon_bounds = o3d.utility.Vector3dVector([
-    [0.3, -0.06, 0],
-    [0.49, -0.06, 0],
-    [0.49, 0.18, 0],
-    [0.3, 0.18, 0]
+    [-0.25, 0.2, 0],
+    [0.42, 0.2, 0],
+    [0.42, 0.62, 0],
+    [-0.25, 0.62, 0]
 ])
-vol.bounding_polygon = o3d.utility.Vector3dVector(polygon_bounds)
-
-# for lite6-1
-# fmt: off
-# polygon_bounds = o3d.utility.Vector3dVector([
-#     [0.089, -0.4, 0],
-#     [0.26, -0.4, 0],
-#     [0.26, -0.23, 0],
-#     [0.089, -0.23, 0]
-# ])
-# vol.bounding_polygon = o3d.utility.Vector3dVector(polygon_bounds)
 # fmt: on
 
+# --------------------------------------------
+
+vol.bounding_polygon = o3d.utility.Vector3dVector(polygon_bounds)
 crop_robot = vol.crop_point_cloud(splat_pcd)
 o3d.visualization.draw_plotly([crop_robot])
-# o3d.visualization.draw_plotly([crop_robot, robot_pcd])
 
 
 # %%
@@ -173,12 +178,21 @@ logging.warning("Using existing bounding polygon guess. Modify if needed.")
 center_crop_robot = crop_robot.get_center()
 center_robot_pcd = robot_pcd.get_center()
 translate_robot_pcd_to_crop = center_crop_robot - center_robot_pcd
-R = robot_pcd.get_rotation_matrix_from_xyz((0, 0, -np.pi / 2))
+# --------------------------------------------
+# CHANGE THESE VALUES TO CUSTOM ROBOT
+# R = robot_pcd.get_rotation_matrix_from_xyz((0, 0, -np.pi / 2))
+# threshold = 0.2
+# trans_init = np.eye(4)
+# scale_init = 1
+# adjusted_offset = np.array([0, 0, 0])
+
+R = robot_pcd.get_rotation_matrix_from_xyz((0, 0, 0))
 threshold = 0.2
 trans_init = np.eye(4)
 scale_init = 1
-trans_init[:3, :3] = scale_init * R
 adjusted_offset = np.array([0, 0, 0])
+# --------------------------------------------
+trans_init[:3, :3] = scale_init * R
 trans_init[:3, 3] = translate_robot_pcd_to_crop + adjusted_offset
 logging.warning("Using existing transformation guess. Modify if needed.")
 
@@ -222,7 +236,6 @@ temp_meshes = pycopy(select_meshes)
 temp_meshes = [tmesh.transform(icp_transformation) for tmesh in temp_meshes]
 o3d.visualization.draw_plotly([temp_robot_pcd, crop_robot] + temp_meshes)
 
-
 # %%
 points = np.asarray(crop_robot.points)
 t_points = o3d.core.Tensor(points, dtype=o3d.core.Dtype.Float32)
@@ -234,7 +247,7 @@ for tmesh in temp_meshes:
     scene.add_triangles(tmesh_t)
     occupancy = scene.compute_occupancy(t_points)
     distances = scene.compute_distance(t_points)
-    link_mask = (occupancy.numpy() > 0.5) | (distances.numpy() < 0.007)
+    link_mask = (occupancy.numpy() > 0.5) | (distances.numpy() < 0.015)
     link_masks_local.append(link_mask)
 
 colored_points = np.zeros((points.shape[0], 3))

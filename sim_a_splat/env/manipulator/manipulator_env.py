@@ -12,9 +12,6 @@ from pydrake.all import (
     DrakeLcm,
     DiagramBuilder,
     AddMultibodyPlantSceneGraph,
-    ContactModel,
-    CollisionFilterDeclaration,
-    GeometrySet,
     SurfaceTriangle,
     Simulator,
     Quaternion,
@@ -31,28 +28,30 @@ from drake import (
     lcmt_viewer_geometry_data,
 )
 
-from sim_a_splat.env.xarm.xarm_sim_utils import (
-    PoseToConfig,
-    add_ground_with_friction,
-    add_soft_collisions,
+from sim_a_splat.env.manipulator.manipulator_sim_utils import (
     AddRobotModel,
     add_env_objects,
     MakeHardwareStation,
+    configure_contacts,
 )
+
+from typing import Optional
+import gymnasium as gym
 
 
 # %%
 
 
-class XarmSimEnv:
+class ManipulatorSimEnv(gym.Env):
     def __init__(
         self,
-        env_objects=True,
-        visualise_flag=True,
-        eef_link_name=None,
-        package_path=None,
-        package_name=None,
-        urdf_name=None,
+        env_objects: bool = True,
+        visualise_flag: bool = True,
+        eef_link_name: str = None,
+        package_path: str = None,
+        package_name: str = None,
+        urdf_name: str = None,
+        num_dof: int = None,
     ):
         self.active_meshcat = False
         self.time_step = 1e-2
@@ -65,8 +64,33 @@ class XarmSimEnv:
         self.package_path = package_path
         self.package_name = package_name
         self.urdf_name = urdf_name
+        self.num_dof = num_dof
 
-    def load_model(self):
+        self.observation_space = gym.spaces.Dict(
+            {
+                "robot_joint_pos": gym.spaces.Box(
+                    low=-np.pi,
+                    high=np.pi,
+                    shape=(self.num_dof,),
+                    dtype=np.float32,
+                ),
+                "robot_joint_vel": gym.spaces.Box(
+                    low=-np.inf,
+                    high=np.inf,
+                    shape=(self.num_dof,),
+                    dtype=np.float32,
+                ),
+            }
+        )
+        self.action_space = gym.spaces.Box(
+            low=-np.pi,
+            high=np.pi,
+            shape=(self.num_dof,),
+            dtype=np.float32,
+        )
+        self._load_model()
+
+    def _load_model(self):
         builder = DiagramBuilder()
         plant, scene_graph = AddMultibodyPlantSceneGraph(
             builder, time_step=self.time_step
@@ -82,33 +106,15 @@ class XarmSimEnv:
             urdf_name=self.urdf_name,
             weld_frame_transform=RigidTransform(),
         )
-        # TODO: Modify API to enable loading the same robot multiple times
-        # self.eef_link_name = self.eef_link_name + "_" + str(self.uid)
-        # self.eef_link_name = self.eef_link_name
-        # assumes robot model to be a 6DoF robot arm with fixed base in urdf
-        # TODO: Create API to easily make wrappers around anytype of robot and with an inverse dynamics controller
-        plant.set_contact_model(ContactModel.kHydroelasticsOnly)
-        add_ground_with_friction(plant)
-        add_soft_collisions(plant, eef_link_name=self.eef_link_name)
-        plant.set_penetration_allowance(1e-5)
-        collision_filter_manager = scene_graph.collision_filter_manager()
-        collision_filter_manager.Apply(
-            CollisionFilterDeclaration().ExcludeBetween(
-                GeometrySet(
-                    plant.GetCollisionGeometriesForBody(
-                        plant.GetBodyByName(
-                            self.eef_link_name,
-                            self.robot_model_instance,
-                        )
-                    )
-                ),
-                GeometrySet(plant.GetCollisionGeometriesForBody(plant.world_body())),
-            )
+        configure_contacts(
+            plant,
+            eef_link_name=self.eef_link_name,
+            scene_graph=scene_graph,
+            robot_model_instance=self.robot_model_instance,
         )
         plant.Finalize()
         self.nq = plant.num_positions(self.robot_model_instance)
         self.end_effector_body = plant.GetBodyByName(self.eef_link_name)
-        self.end_effector_frame = self.end_effector_body.body_frame()
         station = builder.AddSystem(
             MakeHardwareStation(
                 self.time_step,
@@ -119,7 +125,6 @@ class XarmSimEnv:
                 uid=self.uid,
             )
         )
-        pose2config = builder.AddSystem(PoseToConfig(plant, self.end_effector_frame))
         builder.Connect(
             plant.get_state_output_port(self.robot_model_instance),
             station.GetInputPort("robot_estimated_state"),
@@ -129,28 +134,25 @@ class XarmSimEnv:
             station.GetOutputPort("robot_torque_commanded"),
             plant.get_actuation_input_port(self.robot_model_instance),
         )
-        builder.Connect(
-            pose2config.get_output_port(), station.GetInputPort("robot_state_desired")
+        builder.ExportInput(
+            station.GetInputPort("robot_state_desired"), "desired_robot_pos"
         )
-        builder.ExportInput(pose2config.GetInputPort("pose"), "desired_pose")
-        builder.ExportOutput(
-            pose2config.GetOutputPort("config"), "desired_joint_position"
-        )
+
         if self.visualize_robot_flag:
             AddDefaultVisualization(builder=builder, meshcat=self.meshcat)
 
         self.plant = plant
         self.diagram = builder.Build()
         self.simulator = Simulator(self.diagram)
-        self.pose_input_port = self.simulator.get_system().GetInputPort("desired_pose")
+        self.robot_pos_input_port = self.simulator.get_system().GetInputPort(
+            "desired_robot_pos"
+        )
         self.state_output_port = self.simulator.get_system().GetOutputPort(
             "system_state_output_port"
         )
-        self.desired_joint_position = self.simulator.get_system().GetOutputPort(
-            "desired_joint_position"
-        )
 
-    def reset(self, reset_to_state=None):
+    def reset(self, seed: Optional[int] = None, reset_to_state=None):
+        super().reset(seed=seed)
         self.diagram_default_context = self.diagram.CreateDefaultContext()
         self.simulator.reset_context(self.diagram_default_context)
         self.simulator_context = self.simulator.get_mutable_context()
@@ -159,30 +161,29 @@ class XarmSimEnv:
             self.simulator_context
         )
         if reset_to_state is None:
-            reset_to_state = [
-                self.np_random.uniform(
-                    low=np.array([0.25, -0.3, 0.2]), high=np.array([0.65, 0.3, 0.2])
+            reset_to_state = {
+                "robot_pos": self.np_random.uniform(
+                    low=-np.pi, high=np.pi, size=self.nq
                 ),
-                self.np_random.uniform(
+                "block_pos": self.np_random.uniform(
                     low=np.array([0.4, -0.183, 0.2, -np.pi]),
                     high=np.array([0.55, 0.183, 0.2, np.pi]),
                 ),
-                np.array([0.475, 0.0, 0.2, 0.78539816]),
-            ]
-        self.pose_input_port.FixValue(
-            self.diagram_context,
-            RigidTransform(RollPitchYaw(3.14, 0, 0), reset_to_state[0]),
-        )
-        reset_to_state[1][2] = 0
-        block_pose = np.hstack(
-            (
-                RotationMatrix(RollPitchYaw(0, 0, -reset_to_state[1][3]))
-                .ToQuaternion()
-                .wxyz(),
-                reset_to_state[1][:3],
-            )
-        )
+                "goal_pos": np.array([0.475, 0.0, 0.2, 0.78539816]),
+            }
+        jpos = reset_to_state["robot_pos"]
+        self.robot_pos_input_port.FixValue(self.diagram_context, jpos)
+
         if self.env_objects_flag:
+            reset_to_state["block_pos"][2] = 0
+            block_pose = np.hstack(
+                (
+                    RotationMatrix(RollPitchYaw(0, 0, -reset_to_state["block_pos"][3]))
+                    .ToQuaternion()
+                    .wxyz(),
+                    reset_to_state["block_pos"][:3],
+                )
+            )
             self.plant.SetPositions(
                 self.plant_context,
                 self.plant.GetModelInstanceByName("tblock_paper"),
@@ -193,7 +194,14 @@ class XarmSimEnv:
                 self.plant.GetModelInstanceByName("tblock_paper"),
                 np.zeros(6),
             )
-        jpos = self.desired_joint_position.Eval(self.diagram_context)
+            reset_to_state["goal_pos"][2] = 0
+            self.goal_pose_transform = RigidTransform(
+                RotationMatrix(RollPitchYaw(0, 0, -reset_to_state["goal_pos"][3])),
+                reset_to_state["goal_pos"][:3],
+            )
+            self.publish_tblock_marker(
+                self.goal_pose_transform, color=Rgba(0, 1, 0, 0.2)
+            )
         self.plant.SetPositions(
             self.plant_context,
             self.robot_model_instance,
@@ -204,13 +212,10 @@ class XarmSimEnv:
             self.robot_model_instance,
             np.zeros(len(jpos)),
         )
-        reset_to_state[2][2] = 0
-        self.goal_pose_transform = RigidTransform(
-            RotationMatrix(RollPitchYaw(0, 0, -reset_to_state[2][3])),
-            reset_to_state[2][:3],
-        )
-        self.publish_tblock_marker(self.goal_pose_transform, color=Rgba(0, 1, 0, 0.2))
         self.simulator.Initialize()
+
+        observation = self._get_obs()
+        return observation
 
     def set_joint_vector_in_drake(self, pos):
         self.qpos = pos
@@ -261,9 +266,7 @@ class XarmSimEnv:
             self.lcm.Publish("DRAKE_VIEWER_DRAW", msg.encode())
 
     def step(self, action, no_obs=False):
-        self.pose_input_port.FixValue(
-            self.diagram_context, RigidTransform(RollPitchYaw(3.14, 0, 0), action)
-        )
+        self.robot_pos_input_port.FixValue(self.diagram_context, action)
         try:
             self.simulator.AdvanceTo(self.simulator_context.get_time() + self.time_step)
         except RuntimeError as e:
@@ -271,60 +274,27 @@ class XarmSimEnv:
         observation = self._get_obs()
         info = self._get_info()
         reward = self._compute_reward(info)
-        done = self._is_done(info, reward)
-        if done:
-            end_location = np.array([0.25, 0.3, 0.2])
-            self.publish_robot_end_location(end_location=end_location)
-            if type(observation) is tuple:
-                eef_goal_dist = np.linalg.norm(observation[0][:2] - end_location[:2])
-            else:
-                eef_goal_dist = np.linalg.norm(
-                    observation["robot_eef_pos"] - end_location[:2]
-                )
-            if eef_goal_dist > 0.008:
-                done = False
-        else:
-            try:
-                self.meshcat.Delete("eef_goal")
-            except:
-                pass
-
-        return observation, reward, done, info
+        terminated = self._is_done(info, reward)
+        truncated = False
+        return observation, reward, terminated, truncated, info
 
     def _get_obs(self):
-        eef_pose = self.plant.EvalBodyPoseInWorld(
-            self.plant_context, self.end_effector_body
+        robot_state = self.plant.get_state_output_port(self.robot_model_instance).Eval(
+            self.plant_context
         )
-        eef_pos = eef_pose.translation()
-        eef_quat = eef_pose.rotation().ToQuaternion().wxyz()
-        eef_vel = self.plant.EvalBodySpatialVelocityInWorld(
-            self.plant_context, self.end_effector_body
-        )
-        return (
-            eef_pos,
-            eef_quat,
-            eef_vel.translational(),
-            eef_vel.rotational(),
-        )
+        robot_pos = robot_state[: self.nq]
+        robot_vel = robot_state[self.nq :]
+        obs = {
+            "robot_joint_pos": robot_pos,
+            "robot_joint_vel": robot_vel,
+        }
+        return obs
 
     def _get_action(self):
         desired_eef_pose = self.pose_input_port.Eval(self.diagram_context)
         return desired_eef_pose.translation()
 
     def _get_info(self):
-        robot_state = self.plant.get_state_output_port(self.robot_model_instance).Eval(
-            self.plant_context
-        )
-        robot_pos = robot_state[: self.nq]
-        robot_vel = robot_state[self.nq :]
-
-        block_state = self.plant.get_state_output_port(
-            self.plant.GetModelInstanceByName("tblock_paper")
-        ).Eval(self.plant_context)
-
-        block_pose = block_state[:7]
-        block_vel = block_state[7:]
-
         eef_pose = self.plant.EvalBodyPoseInWorld(
             self.plant_context, self.end_effector_body
         )
@@ -333,63 +303,54 @@ class XarmSimEnv:
         eef_vel = self.plant.EvalBodySpatialVelocityInWorld(
             self.plant_context, self.end_effector_body
         )
-        info = {
-            "robot_pos": robot_pos,
-            "robot_vel": robot_vel,
-            "block_pose": block_pose,
-            "block_vel": block_vel,
-            "eef_pos": eef_pos,
-            "eef_quat": eef_quat,
-            "eef_vel": eef_vel.translational(),
-            "eef_ang_vel": eef_vel.rotational(),
-            "timestamp": self.simulator_context.get_time(),
-        }
-        return info
+        if self.env_objects_flag:
+            block_state = self.plant.get_state_output_port(
+                self.plant.GetModelInstanceByName("tblock_paper")
+            ).Eval(self.plant_context)
+
+            block_pose = block_state[:7]
+            block_vel = block_state[7:]
+            info = {
+                "eef_pos": eef_pos,
+                "eef_quat": eef_quat,
+                "eef_pos_vel": eef_vel.translational(),
+                "eef_rot_vel": eef_vel.rotational(),
+                "block_pose": block_pose,
+                "block_vel": block_vel,
+                "timestamp": self.simulator_context.get_time(),
+            }
+            return info
+        else:
+            return {
+                "eef_pos": eef_pos,
+                "eef_quat": eef_quat,
+                "eef_pos_vel": eef_vel.translational(),
+                "eef_rot_vel": eef_vel.rotational(),
+                "timestamp": self.simulator_context.get_time(),
+            }
 
     def _compute_reward(self, info):
-        goal_pos = self.goal_pose_transform.translation()
-        block_pos = info["block_pose"][4:]
-        r1 = -np.linalg.norm(goal_pos - block_pos)
+        if self.env_objects_flag:
+            goal_pos = self.goal_pose_transform.translation()
+            block_pos = info["block_pose"][4:]
+            r1 = -np.linalg.norm(goal_pos - block_pos)
 
-        goal_yaw = self.goal_pose_transform.rotation().ToRollPitchYaw().vector()[2]
-        quat = info["block_pose"][:4]
-        block_yaw = (
-            RotationMatrix(Quaternion(quat / np.linalg.norm(quat)))
-            .ToRollPitchYaw()
-            .vector()
-        )[2]
-        r2 = -np.abs(goal_yaw - block_yaw)
-        return r1 + r2
+            goal_yaw = self.goal_pose_transform.rotation().ToRollPitchYaw().vector()[2]
+            quat = info["block_pose"][:4]
+            block_yaw = (
+                RotationMatrix(Quaternion(quat / np.linalg.norm(quat)))
+                .ToRollPitchYaw()
+                .vector()
+            )[2]
+            r2 = -np.abs(goal_yaw - block_yaw)
+            return r1 + r2
+        else:
+            return 0.0
 
     def _is_done(self, info, reward):
         if abs(reward) < 0.02:
             return True
         return False
-
-    def _set_to_state(self, state):
-        self.plant.SetPositions(
-            self.plant_context,
-            self.robot_model_instance,
-            state["robot_pos"],
-        )
-        self.plant.SetVelocities(
-            self.plant_context,
-            self.robot_model_instance,
-            np.zeros(len(state["robot_pos"])),
-        )
-        if self.env_objects_flag:
-            # fully free block
-            self.plant.SetPositions(
-                self.plant_context,
-                self.plant.GetModelInstanceByName("tblock_paper"),
-                state["block_pose"],
-            )
-            self.plant.SetVelocities(
-                self.plant_context,
-                self.plant.GetModelInstanceByName("tblock_paper"),
-                np.zeros(6),
-            )
-        self.simulator_context.SetTime(state["timestamp"])
 
     def _generate_loader_msg(self):
         loader_msg = lcmt_viewer_load_robot()
