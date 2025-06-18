@@ -10,7 +10,7 @@ from pydrake.all import (
 
 
 class ManipulatorEEFWrapper(gym.Wrapper):
-    def __init__(self, env):
+    def __init__(self, env, theta_bound=1e-4):
         super().__init__(env)
 
         self.observation_space = gym.spaces.Dict(
@@ -49,6 +49,7 @@ class ManipulatorEEFWrapper(gym.Wrapper):
                 ),
             }
         )
+        self.theta_bound = theta_bound
 
     def eefpose2config(self, eefpose):
         eef_transform = RigidTransform(
@@ -68,7 +69,7 @@ class ManipulatorEEFWrapper(gym.Wrapper):
             R_AbarA=eef_transform.rotation(),
             frameBbar=self.unwrapped.plant.world_frame(),
             R_BbarB=RotationMatrix(),
-            theta_bound=1e-4,
+            theta_bound=self.theta_bound,
         )
         prog = ik.prog()
         prog.SetInitialGuess(

@@ -2,6 +2,7 @@
 import sys
 from pathlib import Path
 import time
+from pydrake.all import RigidTransform, RotationMatrix
 
 sys.path.append(Path(__file__).resolve().parent.parent.__str__())
 from sim_a_splat.env.manipulator.manipulator_env import ManipulatorSimEnv
@@ -14,6 +15,7 @@ package_name = "xarm6/"
 urdf_name = "xarm6_with_push_gripper.urdf"
 eef_link_name = "push_gripper_base_link"
 num_dof = 6
+weld_frame_transform = RigidTransform()
 
 # package_path = (
 #     Path(__file__).resolve().parent.parent.parent / "sim_a_splat/robot_description/"
@@ -22,6 +24,7 @@ num_dof = 6
 # urdf_name = "divar113vhw.urdf"
 # eef_link_name = "link5"
 # num_dof = 5
+# weld_frame_transform = RigidTransform(RotationMatrix(), [0.65, -1.23, 0.42])
 
 # package_path = (
 #     Path(__file__).resolve().parent.parent.parent / "sim_a_splat/robot_description/"
@@ -30,6 +33,7 @@ num_dof = 6
 # urdf_name = "scara.urdf"
 # eef_link_name = "gripper"
 # num_dof = 3
+# weld_frame_transform = RigidTransform()
 
 manipulator_env = ManipulatorSimEnv(
     env_objects=False,
@@ -39,6 +43,7 @@ manipulator_env = ManipulatorSimEnv(
     package_name=package_name,
     urdf_name=urdf_name,
     num_dof=num_dof,
+    weld_frame_transform=weld_frame_transform,
 )
 
 # %%
@@ -51,10 +56,6 @@ obs = manipulator_env.reset(
         "goal_pos": [0.0, 0.0, 0.0, 0.0],
     }
 )
-
-# %%
-
-manipulator_env.step([0.01] * 6)
 
 # %% Create a random walk
 

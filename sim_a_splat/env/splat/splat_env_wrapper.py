@@ -82,6 +82,7 @@ class SplatEnvWrapper(gym.Wrapper):
             self.unwrapped.urdf_name,
             task_assets_path=task_assets_path,
             task_assets_name=task_assets_name,
+            sim_robot_weld_frame_transform=self.unwrapped.weld_frame_transform,
         )
         for _ in tqdm(range(wait_steps), desc="Waiting for client connection"):
             client = self.splat_handler.server.get_clients()

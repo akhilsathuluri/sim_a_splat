@@ -2,29 +2,31 @@
 import sys
 from pathlib import Path
 import time
-from pydrake.all import Quaternion, RotationMatrix, RollPitchYaw
+from pydrake.all import Quaternion, RotationMatrix, RigidTransform
 
 sys.path.append(Path(__file__).resolve().parent.parent.__str__())
 from sim_a_splat.env.manipulator.manipulator_env import ManipulatorSimEnv
 from sim_a_splat.env.manipulator.manipulator_eef_wrapper import ManipulatorEEFWrapper
 import numpy as np
 
-package_path = (
-    Path(__file__).resolve().parent.parent.parent
-    / "sim_a_splat/robot_description/xarm_description/"
-)
-package_name = "xarm6/"
-urdf_name = "xarm6_with_push_gripper.urdf"
-eef_link_name = "push_gripper_base_link"
-num_dof = 6
-
 # package_path = (
-#     Path(__file__).resolve().parent.parent.parent / "sim_a_splat/robot_description/"
+#     Path(__file__).resolve().parent.parent.parent
+#     / "sim_a_splat/robot_description/xarm_description/"
 # )
-# package_name = "divar113vhw/"
-# urdf_name = "divar113vhw.urdf"
-# eef_link_name = "link5"
-# num_dof = 5
+# package_name = "xarm6/"
+# urdf_name = "xarm6_with_push_gripper.urdf"
+# eef_link_name = "push_gripper_base_link"
+# num_dof = 6
+
+package_path = (
+    Path(__file__).resolve().parent.parent.parent / "sim_a_splat/robot_description/"
+)
+package_name = "divar113vhw/"
+urdf_name = "divar113vhw.urdf"
+eef_link_name = "link5"
+num_dof = 5
+# weld_frame_transform = RigidTransform(RotationMatrix(), [0.65, -1.23, 0.42])
+weld_frame_transform = RigidTransform(RotationMatrix())
 
 # TODO: Scara IK fails
 # package_path = (
@@ -43,6 +45,7 @@ manipulator_env = ManipulatorSimEnv(
     package_name=package_name,
     urdf_name=urdf_name,
     num_dof=num_dof,
+    weld_frame_transform=weld_frame_transform,
 )
 
 obs = manipulator_env.reset(
@@ -55,7 +58,10 @@ obs = manipulator_env.reset(
 info = manipulator_env._get_info()
 
 # %%
-manipulator_eef_env = ManipulatorEEFWrapper(manipulator_env)
+manipulator_env.step([0.0] * num_dof)
+
+# %%
+manipulator_eef_env = ManipulatorEEFWrapper(manipulator_env, theta_bound=0.5)
 eef_pos_init = info["eef_pos"]
 eef_quat_init = info["eef_quat"]
 print(f"Initial EEF Position: {eef_pos_init}, Initial EEF Quaternion: {eef_quat_init}")

@@ -52,6 +52,7 @@ class ManipulatorSimEnv(gym.Env):
         package_name: str = None,
         urdf_name: str = None,
         num_dof: int = None,
+        weld_frame_transform: RigidTransform = RigidTransform(),
     ):
         self.active_meshcat = False
         self.time_step = 1e-2
@@ -65,6 +66,7 @@ class ManipulatorSimEnv(gym.Env):
         self.package_name = package_name
         self.urdf_name = urdf_name
         self.num_dof = num_dof
+        self.weld_frame_transform = weld_frame_transform
 
         self.observation_space = gym.spaces.Dict(
             {
@@ -104,7 +106,7 @@ class ManipulatorSimEnv(gym.Env):
             package_path=self.package_path,
             package_name=self.package_name,
             urdf_name=self.urdf_name,
-            weld_frame_transform=RigidTransform(),
+            weld_frame_transform=self.weld_frame_transform,
         )
         configure_contacts(
             plant,
@@ -121,7 +123,7 @@ class ManipulatorSimEnv(gym.Env):
                 package_path=self.package_path,
                 package_name=self.package_name,
                 urdf_name=self.urdf_name,
-                weld_frame_transform=RigidTransform(),
+                weld_frame_transform=self.weld_frame_transform,
                 uid=self.uid,
             )
         )

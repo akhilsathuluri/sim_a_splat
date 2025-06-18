@@ -13,6 +13,7 @@ from urchin import URDF
 import open3d as o3d
 import trimesh
 import tempfile
+from pydrake.all import RigidTransform
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
@@ -30,9 +31,11 @@ class SplatHandler:
         urdf_name: str,
         task_assets_path: str = None,
         task_assets_name: str = None,
+        sim_robot_weld_frame_transform: RigidTransform = RigidTransform(),
         server: viser.ViserServer = None,
     ):
         self.instance_uid = match_object_name
+        self.sim_robot_weld_frame_transform = sim_robot_weld_frame_transform
         self.links: List[Link] = []
         if server is None:
             self.server = viser.ViserServer()
@@ -223,6 +226,14 @@ class SplatHandler:
 
     def draw_handler(self, msg: lcmt_viewer_draw):
         local_idx = 0
+        weld_transform_translation = self.sim_robot_weld_frame_transform.translation()
+        weld_transform_quaternion = (
+            self.sim_robot_weld_frame_transform.rotation().ToQuaternion().wxyz()
+        )
+        assert np.all(
+            weld_transform_quaternion == [1.0, 0.0, 0.0, 0.0]
+        ), "Weld frame transform quaternions other than identity are not supported currently."
+
         for idx in range(msg.num_links):
             if msg.robot_num[idx] == self.rbt_idx:
                 drake_quaternion = msg.quaternion[idx]
@@ -231,7 +242,8 @@ class SplatHandler:
                     wxyz_xyz=np.concatenate(
                         (
                             unit_quaternion,
-                            np.array(msg.position[idx]) * self.scale_factor,
+                            np.array(msg.position[idx] + weld_transform_translation)
+                            * self.scale_factor,
                         )
                     )
                 )
@@ -239,7 +251,7 @@ class SplatHandler:
                     wxyz_xyz=np.concatenate(
                         (
                             unit_quaternion,
-                            np.array(msg.position[idx]),
+                            np.array(msg.position[idx]) + weld_transform_translation,
                         )
                     )
                 )
