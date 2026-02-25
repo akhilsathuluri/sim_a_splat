@@ -47,7 +47,7 @@ class ManipulatorSimEnv(gym.Env):
         self,
         env_objects: bool = True,
         visualise_flag: bool = True,
-        eef_link_name: str = None,
+        eef_link_name: str | list[str] | None = None,
         package_path: str = None,
         package_name: str = None,
         urdf_name: str = None,
@@ -61,25 +61,27 @@ class ManipulatorSimEnv(gym.Env):
         self.env_objects_flag = env_objects
         self.set_visualize_robot_flag(visualise_flag)
         self.seed()
-        self.eef_link_name = eef_link_name
+        self.eef_link_name = [eef_link_name] if isinstance(eef_link_name, str) else (eef_link_name or [])
         self.package_path = package_path
         self.package_name = package_name
         self.urdf_name = urdf_name
         self.num_dof = num_dof
         self.weld_frame_transform = weld_frame_transform
 
+        self._load_model()  # sets self.nq from Drake
+
         self.observation_space = gym.spaces.Dict(
             {
                 "robot_joint_pos": gym.spaces.Box(
                     low=-np.pi,
                     high=np.pi,
-                    shape=(self.num_dof,),
+                    shape=(self.nq,),
                     dtype=np.float32,
                 ),
                 "robot_joint_vel": gym.spaces.Box(
                     low=-np.inf,
                     high=np.inf,
-                    shape=(self.num_dof,),
+                    shape=(self.nq,),
                     dtype=np.float32,
                 ),
             }
@@ -87,10 +89,9 @@ class ManipulatorSimEnv(gym.Env):
         self.action_space = gym.spaces.Box(
             low=-np.pi,
             high=np.pi,
-            shape=(self.num_dof,),
+            shape=(self.nq,),
             dtype=np.float32,
         )
-        self._load_model()
 
     def _load_model(self):
         builder = DiagramBuilder()
@@ -116,7 +117,9 @@ class ManipulatorSimEnv(gym.Env):
         )
         plant.Finalize()
         self.nq = plant.num_positions(self.robot_model_instance)
-        self.end_effector_body = plant.GetBodyByName(self.eef_link_name)
+        self.end_effector_bodies = [
+            plant.GetBodyByName(name) for name in self.eef_link_name
+        ]
         station = builder.AddSystem(
             MakeHardwareStation(
                 self.time_step,
@@ -297,39 +300,27 @@ class ManipulatorSimEnv(gym.Env):
         return desired_eef_pose.translation()
 
     def _get_info(self):
-        eef_pose = self.plant.EvalBodyPoseInWorld(
-            self.plant_context, self.end_effector_body
-        )
-        eef_pos = eef_pose.translation()
-        eef_quat = eef_pose.rotation().ToQuaternion().wxyz()
-        eef_vel = self.plant.EvalBodySpatialVelocityInWorld(
-            self.plant_context, self.end_effector_body
-        )
+        eef_infos = []
+        for body in self.end_effector_bodies:
+            eef_pose = self.plant.EvalBodyPoseInWorld(self.plant_context, body)
+            eef_vel = self.plant.EvalBodySpatialVelocityInWorld(self.plant_context, body)
+            eef_infos.append({
+                "eef_pos": eef_pose.translation(),
+                "eef_quat": eef_pose.rotation().ToQuaternion().wxyz(),
+                "eef_pos_vel": eef_vel.translational(),
+                "eef_rot_vel": eef_vel.rotational(),
+            })
+        info = {
+            "eef_infos": eef_infos,
+            "timestamp": self.simulator_context.get_time(),
+        }
         if self.env_objects_flag:
             block_state = self.plant.get_state_output_port(
                 self.plant.GetModelInstanceByName("tblock_paper")
             ).Eval(self.plant_context)
-
-            block_pose = block_state[:7]
-            block_vel = block_state[7:]
-            info = {
-                "eef_pos": eef_pos,
-                "eef_quat": eef_quat,
-                "eef_pos_vel": eef_vel.translational(),
-                "eef_rot_vel": eef_vel.rotational(),
-                "block_pose": block_pose,
-                "block_vel": block_vel,
-                "timestamp": self.simulator_context.get_time(),
-            }
-            return info
-        else:
-            return {
-                "eef_pos": eef_pos,
-                "eef_quat": eef_quat,
-                "eef_pos_vel": eef_vel.translational(),
-                "eef_rot_vel": eef_vel.rotational(),
-                "timestamp": self.simulator_context.get_time(),
-            }
+            info["block_pose"] = block_state[:7]
+            info["block_vel"] = block_state[7:]
+        return info
 
     def _compute_reward(self, info):
         if self.env_objects_flag:

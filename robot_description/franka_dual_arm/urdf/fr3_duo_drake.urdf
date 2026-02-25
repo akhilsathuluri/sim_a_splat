@@ -1,10 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
 <robot name="fr3_duo">
-  <mujoco>
-    <visual>
-      <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0.1 0.1 0.1" />
-    </visual>
-  </mujoco>
   <link name="world">
   </link>
   <link name="base">
@@ -50,7 +45,7 @@
     <origin rpy="0 0 0" xyz="0 0 0" />
   </joint>
   <link name="left_fr3v2_link0">
-    <visual name="left_fr3v2_link0_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link0.obj" />
       </geometry>
@@ -76,7 +71,7 @@
     <child link="left_fr3v2_link0_accelerometer_bottom" />
   </joint>
   <link name="left_fr3v2_link1">
-    <visual name="left_fr3v2_link1_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link1.obj" />
       </geometry>
@@ -108,11 +103,9 @@
     <axis xyz="0 0 1" />
     <limit effort="87.0" lower="-2.9007400166666666" upper="2.9007400166666666" velocity="2.62" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.9007400166666666" soft_upper_limit="2.9007400166666666" />
-    <position_based_velocity_limits deceleration_limit="6.0" velocity_offset="0.6520000381679385" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="left_fr3v2_link2">
-    <visual name="left_fr3v2_link2_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link2.obj" />
       </geometry>
@@ -144,11 +137,9 @@
     <axis xyz="0 0 1" />
     <limit effort="87.0" lower="-1.8360900166666667" upper="1.8360900166666667" velocity="2.62" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.8360900166666667" soft_upper_limit="1.8360900166666667" />
-    <position_based_velocity_limits deceleration_limit="2.585" velocity_offset="0.2499685851463105" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="left_fr3v2_link3">
-    <visual name="left_fr3v2_link3_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link3.obj" />
       </geometry>
@@ -180,11 +171,9 @@
     <axis xyz="0 0 1" />
     <limit effort="87.0" lower="-2.9007400166666666" upper="2.9007400166666666" velocity="2.62" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.9007400166666666" soft_upper_limit="2.9007400166666666" />
-    <position_based_velocity_limits deceleration_limit="3.5" velocity_offset="0.20053055661577582" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="left_fr3v2_link4">
-    <visual name="left_fr3v2_link4_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link4.obj" />
       </geometry>
@@ -216,11 +205,9 @@
     <axis xyz="0 0 1" />
     <limit effort="87.0" lower="-3.077020016666667" upper="-0.11693708333333333" velocity="2.62" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.077020016666667" soft_upper_limit="-0.11693708333333333" />
-    <position_based_velocity_limits deceleration_limit="4.0" velocity_offset="0.3542181933842238" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="left_fr3v2_link5">
-    <visual name="left_fr3v2_link5_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link5.obj" />
       </geometry>
@@ -252,11 +239,9 @@
     <axis xyz="0 0 1" />
     <limit effort="12.0" lower="-2.87630335" upper="2.87630335" velocity="5.26" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.87630335" soft_upper_limit="2.87630335" />
-    <position_based_velocity_limits deceleration_limit="17.0" velocity_offset="0.5738321197718637" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="left_fr3v2_link6">
-    <visual name="left_fr3v2_link6_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link6.obj" />
       </geometry>
@@ -274,11 +259,9 @@
     <axis xyz="0 0 1" />
     <limit effort="12.0" lower="0.43982265" upper="4.62163335" velocity="4.18" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="0.43982265" soft_upper_limit="4.62163335" />
-    <position_based_velocity_limits deceleration_limit="5.5" velocity_offset="0.4884649342105264" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="left_fr3v2_link7">
-    <visual name="left_fr3v2_link7_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link7.obj" />
       </geometry>
@@ -296,8 +279,6 @@
     <axis xyz="0 0 1" />
     <limit effort="12.0" lower="-3.05083335" upper="3.05083335" velocity="5.26" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.05083335" soft_upper_limit="3.05083335" />
-    <position_based_velocity_limits deceleration_limit="17.0" velocity_offset="0.4591952376425851" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="left_fr3v2_link8" />
   <joint name="left_fr3v2_joint8" type="fixed">
@@ -311,7 +292,7 @@
     <origin rpy="0 0 -0.7853981633974483" xyz="0 0 0" />
   </joint>
   <link name="left_fr3v2_hand">
-    <visual name="left_fr3v2_hand_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_ee/franka_hand_white/visual/hand.obj" />
       </geometry>
@@ -329,7 +310,7 @@
     <child link="left_fr3v2_hand_tcp" />
   </joint>
   <link name="left_fr3v2_leftfinger">
-    <visual name="left_fr3v2_leftfinger_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_ee/franka_hand_white/visual/finger.obj" />
       </geometry>
@@ -341,7 +322,7 @@
     </inertial>
   </link>
   <link name="left_fr3v2_rightfinger">
-    <visual name="left_fr3v2_rightfinger_visual">
+    <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_ee/franka_hand_white/visual/finger.obj" />
@@ -359,7 +340,6 @@
     <origin rpy="0 0 0" xyz="0 0 0.0584" />
     <axis xyz="0 1 0" />
     <limit effort="100" lower="0.0" upper="0.04" velocity="0.2" />
-    <dynamics damping="0.3" />
   </joint>
   <joint name="left_fr3v2_finger_joint2" type="prismatic">
     <parent link="left_fr3v2_hand" />
@@ -368,7 +348,6 @@
     <axis xyz="0 1 0" />
     <limit effort="100" lower="0.0" upper="0.04" velocity="0.2" />
     <mimic joint="left_fr3v2_finger_joint1" />
-    <dynamics damping="0.3" />
   </joint>
   <joint name="right_base_joint" type="fixed">
     <parent link="mount_link" />
@@ -383,7 +362,7 @@
     <origin rpy="0 0 0" xyz="0 0 0" />
   </joint>
   <link name="right_fr3v2_link0">
-    <visual name="right_fr3v2_link0_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link0.obj" />
       </geometry>
@@ -409,7 +388,7 @@
     <child link="right_fr3v2_link0_accelerometer_bottom" />
   </joint>
   <link name="right_fr3v2_link1">
-    <visual name="right_fr3v2_link1_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link1.obj" />
       </geometry>
@@ -441,11 +420,9 @@
     <axis xyz="0 0 1" />
     <limit effort="87.0" lower="-2.9007400166666666" upper="2.9007400166666666" velocity="2.62" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.9007400166666666" soft_upper_limit="2.9007400166666666" />
-    <position_based_velocity_limits deceleration_limit="6.0" velocity_offset="0.6520000381679385" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="right_fr3v2_link2">
-    <visual name="right_fr3v2_link2_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link2.obj" />
       </geometry>
@@ -477,11 +454,9 @@
     <axis xyz="0 0 1" />
     <limit effort="87.0" lower="-1.8360900166666667" upper="1.8360900166666667" velocity="2.62" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.8360900166666667" soft_upper_limit="1.8360900166666667" />
-    <position_based_velocity_limits deceleration_limit="2.585" velocity_offset="0.2499685851463105" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="right_fr3v2_link3">
-    <visual name="right_fr3v2_link3_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link3.obj" />
       </geometry>
@@ -513,11 +488,9 @@
     <axis xyz="0 0 1" />
     <limit effort="87.0" lower="-2.9007400166666666" upper="2.9007400166666666" velocity="2.62" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.9007400166666666" soft_upper_limit="2.9007400166666666" />
-    <position_based_velocity_limits deceleration_limit="3.5" velocity_offset="0.20053055661577582" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="right_fr3v2_link4">
-    <visual name="right_fr3v2_link4_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link4.obj" />
       </geometry>
@@ -549,11 +522,9 @@
     <axis xyz="0 0 1" />
     <limit effort="87.0" lower="-3.077020016666667" upper="-0.11693708333333333" velocity="2.62" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.077020016666667" soft_upper_limit="-0.11693708333333333" />
-    <position_based_velocity_limits deceleration_limit="4.0" velocity_offset="0.3542181933842238" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="right_fr3v2_link5">
-    <visual name="right_fr3v2_link5_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link5.obj" />
       </geometry>
@@ -585,11 +556,9 @@
     <axis xyz="0 0 1" />
     <limit effort="12.0" lower="-2.87630335" upper="2.87630335" velocity="5.26" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.87630335" soft_upper_limit="2.87630335" />
-    <position_based_velocity_limits deceleration_limit="17.0" velocity_offset="0.5738321197718637" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="right_fr3v2_link6">
-    <visual name="right_fr3v2_link6_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link6.obj" />
       </geometry>
@@ -607,11 +576,9 @@
     <axis xyz="0 0 1" />
     <limit effort="12.0" lower="0.43982265" upper="4.62163335" velocity="4.18" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="0.43982265" soft_upper_limit="4.62163335" />
-    <position_based_velocity_limits deceleration_limit="5.5" velocity_offset="0.4884649342105264" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="right_fr3v2_link7">
-    <visual name="right_fr3v2_link7_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_arms/fr3v2/visual/link7.obj" />
       </geometry>
@@ -629,8 +596,6 @@
     <axis xyz="0 0 1" />
     <limit effort="12.0" lower="-3.05083335" upper="3.05083335" velocity="5.26" />
     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.05083335" soft_upper_limit="3.05083335" />
-    <position_based_velocity_limits deceleration_limit="17.0" velocity_offset="0.4591952376425851" />
-    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
   </joint>
   <link name="right_fr3v2_link8" />
   <joint name="right_fr3v2_joint8" type="fixed">
@@ -644,7 +609,7 @@
     <origin rpy="0 0 -0.7853981633974483" xyz="0 0 0" />
   </joint>
   <link name="right_fr3v2_hand">
-    <visual name="right_fr3v2_hand_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_ee/franka_hand_white/visual/hand.obj" />
       </geometry>
@@ -662,7 +627,7 @@
     <child link="right_fr3v2_hand_tcp" />
   </joint>
   <link name="right_fr3v2_leftfinger">
-    <visual name="right_fr3v2_leftfinger_visual">
+    <visual>
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_ee/franka_hand_white/visual/finger.obj" />
       </geometry>
@@ -674,7 +639,7 @@
     </inertial>
   </link>
   <link name="right_fr3v2_rightfinger">
-    <visual name="right_fr3v2_rightfinger_visual">
+    <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
         <mesh filename="package://franka_dual_arm/meshes/robot_ee/franka_hand_white/visual/finger.obj" />
@@ -692,7 +657,6 @@
     <origin rpy="0 0 0" xyz="0 0 0.0584" />
     <axis xyz="0 1 0" />
     <limit effort="100" lower="0.0" upper="0.04" velocity="0.2" />
-    <dynamics damping="0.3" />
   </joint>
   <joint name="right_fr3v2_finger_joint2" type="prismatic">
     <parent link="right_fr3v2_hand" />
@@ -701,6 +665,5 @@
     <axis xyz="0 1 0" />
     <limit effort="100" lower="0.0" upper="0.04" velocity="0.2" />
     <mimic joint="right_fr3v2_finger_joint1" />
-    <dynamics damping="0.3" />
   </joint>
 </robot>
