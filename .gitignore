@@ -10,6 +10,7 @@ evals/
 exports/
 assets/scara/
 assets/divar113vhw/
+assets/
 
 ./*sh
 
@@ -185,3 +186,4 @@ cython_debug/
 # pixi environments
 .pixi
 *.egg-info
+.claude

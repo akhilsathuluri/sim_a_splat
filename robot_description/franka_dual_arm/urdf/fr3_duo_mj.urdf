@@ -1,0 +1,706 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="fr3_duo">
+  <mujoco>
+    <visual>
+      <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0.1 0.1 0.1" />
+    </visual>
+  </mujoco>
+  <link name="world">
+  </link>
+  <link name="base">
+  </link>
+  <joint name="world_to_base_joint" type="fixed">
+    <parent link="world" />
+    <child link="base" />
+    <origin rpy="0 0 0" xyz="0 0 0" />
+  </joint>
+  <link name="mount_link">
+    <visual>
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/accessories/fr3_duo_mount/visual/fr3_duo_mount.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0.068" />
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/accessories/fr3_duo_mount/visual/fr3_duo_cover.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.011817 -0.00005 0.044431" />
+      <mass value="4.093846" />
+      <inertia ixx="0.0224318121" ixy="1.38076e-06" ixz="-0.0015719371" iyy="0.0164193182" iyz="-1.442621e-06" izz="0.0217407036" />
+    </inertial>
+  </link>
+  <joint name="mount_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0" />
+    <parent link="base" />
+    <child link="mount_link" />
+  </joint>
+  <joint name="left_base_joint" type="fixed">
+    <parent link="mount_link" />
+    <child link="left_base" />
+    <origin rpy="-0.89334809 -0.17456074 -0.46334506" xyz="0.0369 0.05018 0.050885" />
+  </joint>
+  <link name="left_base">
+      </link>
+  <joint name="left_fr3v2_left_base_joint" type="fixed">
+    <parent link="left_base" />
+    <child link="left_fr3v2_link0" />
+    <origin rpy="0 0 0" xyz="0 0 0" />
+  </joint>
+  <link name="left_fr3v2_link0">
+    <visual name="left_fr3v2_link0_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link0.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.017200 0.000400 0.074500" />
+      <mass value="2.3966" />
+      <inertia ixx="0.009" ixy="0.0" ixz="0.002" iyy="0.0115" iyz="0.0" izz="0.0085" />
+    </inertial>
+  </link>
+  <link name="left_fr3v2_link0_accelerometer_top">
+      </link>
+  <joint name="left_fr3v2_link0_accelerometer_top_joint" type="fixed">
+    <origin rpy="3.14159 0 0" xyz="0 0 0.05" />
+    <parent link="left_fr3v2_link0" />
+    <child link="left_fr3v2_link0_accelerometer_top" />
+  </joint>
+  <link name="left_fr3v2_link0_accelerometer_bottom">
+      </link>
+  <joint name="left_fr3v2_link0_accelerometer_bottom_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.06" />
+    <parent link="left_fr3v2_link0" />
+    <child link="left_fr3v2_link0_accelerometer_bottom" />
+  </joint>
+  <link name="left_fr3v2_link1">
+    <visual name="left_fr3v2_link1_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link1.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.004580 0.027016 -0.061800" />
+      <mass value="2.4377" />
+      <inertia ixx="0.02324" ixy="0.000333" ixz="-0.000676" iyy="0.02146" iyz="0.003739" izz="0.0055" />
+    </inertial>
+  </link>
+  <link name="left_fr3v2_link1_accelerometer_top">
+      </link>
+  <joint name="left_fr3v2_link1_accelerometer_top_joint" type="fixed">
+    <origin rpy="1.5708 0 0" xyz="0 -0.1 0.0" />
+    <parent link="left_fr3v2_link1" />
+    <child link="left_fr3v2_link1_accelerometer_top" />
+  </joint>
+  <link name="left_fr3v2_link1_accelerometer_bottom">
+      </link>
+  <joint name="left_fr3v2_link1_accelerometer_bottom_joint" type="fixed">
+    <origin rpy="-1.5708 0 0" xyz="0 -0.09 0.0" />
+    <parent link="left_fr3v2_link1" />
+    <child link="left_fr3v2_link1_accelerometer_bottom" />
+  </joint>
+  <joint name="left_fr3v2_joint1" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0.333" />
+    <parent link="left_fr3v2_link0" />
+    <child link="left_fr3v2_link1" />
+    <axis xyz="0 0 1" />
+    <limit effort="87.0" lower="-2.9007400166666666" upper="2.9007400166666666" velocity="2.62" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.9007400166666666" soft_upper_limit="2.9007400166666666" />
+    <position_based_velocity_limits deceleration_limit="6.0" velocity_offset="0.6520000381679385" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="left_fr3v2_link2">
+    <visual name="left_fr3v2_link2_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link2.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.004541 -0.180691 -0.010479" />
+      <mass value="2.2375" />
+      <inertia ixx="0.019026" ixy="0.001241" ixz="0.000499" iyy="0.00566" iyz="-0.001804" izz="0.017114" />
+    </inertial>
+  </link>
+  <link name="left_fr3v2_link2_accelerometer_top">
+      </link>
+  <joint name="left_fr3v2_link2_accelerometer_top_joint" type="fixed">
+    <origin rpy="-1.5708 0 0" xyz="0 -0.13 0" />
+    <parent link="left_fr3v2_link2" />
+    <child link="left_fr3v2_link2_accelerometer_top" />
+  </joint>
+  <link name="left_fr3v2_link2_accelerometer_bottom">
+      </link>
+  <joint name="left_fr3v2_link2_accelerometer_bottom_joint" type="fixed">
+    <origin rpy="1.5708 0 0" xyz="0 -0.14 0" />
+    <parent link="left_fr3v2_link2" />
+    <child link="left_fr3v2_link2_accelerometer_bottom" />
+  </joint>
+  <joint name="left_fr3v2_joint2" type="revolute">
+    <origin rpy="-1.570796326794897 0 0" xyz="0 0 0" />
+    <parent link="left_fr3v2_link1" />
+    <child link="left_fr3v2_link2" />
+    <axis xyz="0 0 1" />
+    <limit effort="87.0" lower="-1.8360900166666667" upper="1.8360900166666667" velocity="2.62" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.8360900166666667" soft_upper_limit="1.8360900166666667" />
+    <position_based_velocity_limits deceleration_limit="2.585" velocity_offset="0.2499685851463105" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="left_fr3v2_link3">
+    <visual name="left_fr3v2_link3_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link3.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.082540 0.019082 0.042027" />
+      <mass value="2.193082" />
+      <inertia ixx="0.010225" ixy="0.001144" ixz="0.003497" iyy="0.012398" iyz="0.002156" izz="0.006877" />
+    </inertial>
+  </link>
+  <link name="left_fr3v2_link3_accelerometer_top">
+      </link>
+  <joint name="left_fr3v2_link3_accelerometer_top_joint" type="fixed">
+    <origin rpy="-1.5708 0 0" xyz="0.0825 0.05 0" />
+    <parent link="left_fr3v2_link3" />
+    <child link="left_fr3v2_link3_accelerometer_top" />
+  </joint>
+  <link name="left_fr3v2_link3_accelerometer_bottom">
+      </link>
+  <joint name="left_fr3v2_link3_accelerometer_bottom_joint" type="fixed">
+    <origin rpy="1.5708 0 0" xyz="0.0825 0.04 0" />
+    <parent link="left_fr3v2_link3" />
+    <child link="left_fr3v2_link3_accelerometer_bottom" />
+  </joint>
+  <joint name="left_fr3v2_joint3" type="revolute">
+    <origin rpy="1.570796326794897 0 0" xyz="0 -0.316 0" />
+    <parent link="left_fr3v2_link2" />
+    <child link="left_fr3v2_link3" />
+    <axis xyz="0 0 1" />
+    <limit effort="87.0" lower="-2.9007400166666666" upper="2.9007400166666666" velocity="2.62" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.9007400166666666" soft_upper_limit="2.9007400166666666" />
+    <position_based_velocity_limits deceleration_limit="3.5" velocity_offset="0.20053055661577582" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="left_fr3v2_link4">
+    <visual name="left_fr3v2_link4_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link4.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.087533 0.096335 0.010120" />
+      <mass value="2.181537" />
+      <inertia ixx="0.008878" ixy="-0.003749" ixz="0.001139" iyy="0.007628" iyz="-0.00046" izz="0.010295" />
+    </inertial>
+  </link>
+  <link name="left_fr3v2_link4_accelerometer_top">
+      </link>
+  <joint name="left_fr3v2_link4_accelerometer_top_joint" type="fixed">
+    <origin rpy="1.5708 0 0" xyz="-0.0825 0.05 0" />
+    <parent link="left_fr3v2_link4" />
+    <child link="left_fr3v2_link4_accelerometer_top" />
+  </joint>
+  <link name="left_fr3v2_link4_accelerometer_bottom">
+      </link>
+  <joint name="left_fr3v2_link4_accelerometer_bottom_joint" type="fixed">
+    <origin rpy="-1.5708 0 0" xyz="-0.0825 0.06 0" />
+    <parent link="left_fr3v2_link4" />
+    <child link="left_fr3v2_link4_accelerometer_bottom" />
+  </joint>
+  <joint name="left_fr3v2_joint4" type="revolute">
+    <origin rpy="1.570796326794897 0 0" xyz="0.0825 0 0" />
+    <parent link="left_fr3v2_link3" />
+    <child link="left_fr3v2_link4" />
+    <axis xyz="0 0 1" />
+    <limit effort="87.0" lower="-3.077020016666667" upper="-0.11693708333333333" velocity="2.62" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.077020016666667" soft_upper_limit="-0.11693708333333333" />
+    <position_based_velocity_limits deceleration_limit="4.0" velocity_offset="0.3542181933842238" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="left_fr3v2_link5">
+    <visual name="left_fr3v2_link5_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link5.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.008383 0.010180 -0.053265" />
+      <mass value="2.186881" />
+      <inertia ixx="0.031874" ixy="0.000134" ixz="-0.000265" iyy="0.029674" iyz="-0.004734" izz="0.004751" />
+    </inertial>
+  </link>
+  <link name="left_fr3v2_link5_accelerometer_top">
+      </link>
+  <joint name="left_fr3v2_link5_accelerometer_top_joint" type="fixed">
+    <origin rpy="-1.5708 0 0" xyz="0 0.11 0" />
+    <parent link="left_fr3v2_link5" />
+    <child link="left_fr3v2_link5_accelerometer_top" />
+  </joint>
+  <link name="left_fr3v2_link5_accelerometer_bottom">
+      </link>
+  <joint name="left_fr3v2_link5_accelerometer_bottom_joint" type="fixed">
+    <origin rpy="1.5708 0 0" xyz="0 0.1 0" />
+    <parent link="left_fr3v2_link5" />
+    <child link="left_fr3v2_link5_accelerometer_bottom" />
+  </joint>
+  <joint name="left_fr3v2_joint5" type="revolute">
+    <origin rpy="-1.570796326794897 0 0" xyz="-0.0825 0.384 0" />
+    <parent link="left_fr3v2_link4" />
+    <child link="left_fr3v2_link5" />
+    <axis xyz="0 0 1" />
+    <limit effort="12.0" lower="-2.87630335" upper="2.87630335" velocity="5.26" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.87630335" soft_upper_limit="2.87630335" />
+    <position_based_velocity_limits deceleration_limit="17.0" velocity_offset="0.5738321197718637" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="left_fr3v2_link6">
+    <visual name="left_fr3v2_link6_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link6.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.070391 -0.016074 -0.035025" />
+      <mass value="1.579681" />
+      <inertia ixx="0.00286" ixy="-0.000553" ixz="-0.000638" iyy="0.00391" iyz="-0.00024" izz="0.00453" />
+    </inertial>
+  </link>
+  <joint name="left_fr3v2_joint6" type="revolute">
+    <origin rpy="1.570796326794897 0 0" xyz="0 0 0" />
+    <parent link="left_fr3v2_link5" />
+    <child link="left_fr3v2_link6" />
+    <axis xyz="0 0 1" />
+    <limit effort="12.0" lower="0.43982265" upper="4.62163335" velocity="4.18" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="0.43982265" soft_upper_limit="4.62163335" />
+    <position_based_velocity_limits deceleration_limit="5.5" velocity_offset="0.4884649342105264" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="left_fr3v2_link7">
+    <visual name="left_fr3v2_link7_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link7.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.009108 0.018151 0.064946" />
+      <mass value="0.694841" />
+      <inertia ixx="0.000899" ixy="0.0" ixz="-1.3e-05" iyy="0.001099" iyz="-2.2e-05" izz="0.000702" />
+    </inertial>
+  </link>
+  <joint name="left_fr3v2_joint7" type="revolute">
+    <origin rpy="1.570796326794897 0 0" xyz="0.088 0 0" />
+    <parent link="left_fr3v2_link6" />
+    <child link="left_fr3v2_link7" />
+    <axis xyz="0 0 1" />
+    <limit effort="12.0" lower="-3.05083335" upper="3.05083335" velocity="5.26" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.05083335" soft_upper_limit="3.05083335" />
+    <position_based_velocity_limits deceleration_limit="17.0" velocity_offset="0.4591952376425851" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="left_fr3v2_link8" />
+  <joint name="left_fr3v2_joint8" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.107" />
+    <parent link="left_fr3v2_link7" />
+    <child link="left_fr3v2_link8" />
+  </joint>
+  <joint name="left_fr3v2_hand_joint" type="fixed">
+    <parent link="left_fr3v2_link8" />
+    <child link="left_fr3v2_hand" />
+    <origin rpy="0 0 -0.7853981633974483" xyz="0 0 0" />
+  </joint>
+  <link name="left_fr3v2_hand">
+    <visual name="left_fr3v2_hand_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_ee/franka_hand_white/visual/hand.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0000376 0.0119128 0.0207260" />
+      <mass value="0.6544" />
+      <inertia ixx="0.00186" ixy="0.0" ixz="0.0" iyy="0.0003" iyz="-2e-05" izz="0.00174" />
+    </inertial>
+  </link>
+  <link name="left_fr3v2_hand_tcp" />
+  <joint name="left_fr3v2_hand_tcp_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.1034" />
+    <parent link="left_fr3v2_hand" />
+    <child link="left_fr3v2_hand_tcp" />
+  </joint>
+  <link name="left_fr3v2_leftfinger">
+    <visual name="left_fr3v2_leftfinger_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_ee/franka_hand_white/visual/finger.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0.0152850 0.0219675" />
+      <mass value="0.0291" />
+      <inertia ixx="8.49e-06" ixy="0.0" ixz="0.0" iyy="8.53e-06" iyz="-1.06e-06" izz="1.77e-06" />
+    </inertial>
+  </link>
+  <link name="left_fr3v2_rightfinger">
+    <visual name="left_fr3v2_rightfinger_visual">
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_ee/franka_hand_white/visual/finger.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0.0152850 0.0219675" />
+      <mass value="0.0291" />
+      <inertia ixx="8.49e-06" ixy="0.0" ixz="0.0" iyy="8.53e-06" iyz="-1.06e-06" izz="1.77e-06" />
+    </inertial>
+  </link>
+  <joint name="left_fr3v2_finger_joint1" type="prismatic">
+    <parent link="left_fr3v2_hand" />
+    <child link="left_fr3v2_leftfinger" />
+    <origin rpy="0 0 0" xyz="0 0 0.0584" />
+    <axis xyz="0 1 0" />
+    <limit effort="100" lower="0.0" upper="0.04" velocity="0.2" />
+    <dynamics damping="0.3" />
+  </joint>
+  <joint name="left_fr3v2_finger_joint2" type="prismatic">
+    <parent link="left_fr3v2_hand" />
+    <child link="left_fr3v2_rightfinger" />
+    <origin rpy="0 0 3.141592653589793" xyz="0 0 0.0584" />
+    <axis xyz="0 1 0" />
+    <limit effort="100" lower="0.0" upper="0.04" velocity="0.2" />
+    <mimic joint="left_fr3v2_finger_joint1" />
+    <dynamics damping="0.3" />
+  </joint>
+  <joint name="right_base_joint" type="fixed">
+    <parent link="mount_link" />
+    <child link="right_base" />
+    <origin rpy="0.89334809 -0.17456074 0.46334506" xyz="0.0369 -0.05018 0.050885" />
+  </joint>
+  <link name="right_base">
+      </link>
+  <joint name="right_fr3v2_right_base_joint" type="fixed">
+    <parent link="right_base" />
+    <child link="right_fr3v2_link0" />
+    <origin rpy="0 0 0" xyz="0 0 0" />
+  </joint>
+  <link name="right_fr3v2_link0">
+    <visual name="right_fr3v2_link0_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link0.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.017200 0.000400 0.074500" />
+      <mass value="2.3966" />
+      <inertia ixx="0.009" ixy="0.0" ixz="0.002" iyy="0.0115" iyz="0.0" izz="0.0085" />
+    </inertial>
+  </link>
+  <link name="right_fr3v2_link0_accelerometer_top">
+      </link>
+  <joint name="right_fr3v2_link0_accelerometer_top_joint" type="fixed">
+    <origin rpy="3.14159 0 0" xyz="0 0 0.05" />
+    <parent link="right_fr3v2_link0" />
+    <child link="right_fr3v2_link0_accelerometer_top" />
+  </joint>
+  <link name="right_fr3v2_link0_accelerometer_bottom">
+      </link>
+  <joint name="right_fr3v2_link0_accelerometer_bottom_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.06" />
+    <parent link="right_fr3v2_link0" />
+    <child link="right_fr3v2_link0_accelerometer_bottom" />
+  </joint>
+  <link name="right_fr3v2_link1">
+    <visual name="right_fr3v2_link1_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link1.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.004580 0.027016 -0.061800" />
+      <mass value="2.4377" />
+      <inertia ixx="0.02324" ixy="0.000333" ixz="-0.000676" iyy="0.02146" iyz="0.003739" izz="0.0055" />
+    </inertial>
+  </link>
+  <link name="right_fr3v2_link1_accelerometer_top">
+      </link>
+  <joint name="right_fr3v2_link1_accelerometer_top_joint" type="fixed">
+    <origin rpy="1.5708 0 0" xyz="0 -0.1 0.0" />
+    <parent link="right_fr3v2_link1" />
+    <child link="right_fr3v2_link1_accelerometer_top" />
+  </joint>
+  <link name="right_fr3v2_link1_accelerometer_bottom">
+      </link>
+  <joint name="right_fr3v2_link1_accelerometer_bottom_joint" type="fixed">
+    <origin rpy="-1.5708 0 0" xyz="0 -0.09 0.0" />
+    <parent link="right_fr3v2_link1" />
+    <child link="right_fr3v2_link1_accelerometer_bottom" />
+  </joint>
+  <joint name="right_fr3v2_joint1" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0.333" />
+    <parent link="right_fr3v2_link0" />
+    <child link="right_fr3v2_link1" />
+    <axis xyz="0 0 1" />
+    <limit effort="87.0" lower="-2.9007400166666666" upper="2.9007400166666666" velocity="2.62" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.9007400166666666" soft_upper_limit="2.9007400166666666" />
+    <position_based_velocity_limits deceleration_limit="6.0" velocity_offset="0.6520000381679385" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="right_fr3v2_link2">
+    <visual name="right_fr3v2_link2_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link2.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.004541 -0.180691 -0.010479" />
+      <mass value="2.2375" />
+      <inertia ixx="0.019026" ixy="0.001241" ixz="0.000499" iyy="0.00566" iyz="-0.001804" izz="0.017114" />
+    </inertial>
+  </link>
+  <link name="right_fr3v2_link2_accelerometer_top">
+      </link>
+  <joint name="right_fr3v2_link2_accelerometer_top_joint" type="fixed">
+    <origin rpy="-1.5708 0 0" xyz="0 -0.13 0" />
+    <parent link="right_fr3v2_link2" />
+    <child link="right_fr3v2_link2_accelerometer_top" />
+  </joint>
+  <link name="right_fr3v2_link2_accelerometer_bottom">
+      </link>
+  <joint name="right_fr3v2_link2_accelerometer_bottom_joint" type="fixed">
+    <origin rpy="1.5708 0 0" xyz="0 -0.14 0" />
+    <parent link="right_fr3v2_link2" />
+    <child link="right_fr3v2_link2_accelerometer_bottom" />
+  </joint>
+  <joint name="right_fr3v2_joint2" type="revolute">
+    <origin rpy="-1.570796326794897 0 0" xyz="0 0 0" />
+    <parent link="right_fr3v2_link1" />
+    <child link="right_fr3v2_link2" />
+    <axis xyz="0 0 1" />
+    <limit effort="87.0" lower="-1.8360900166666667" upper="1.8360900166666667" velocity="2.62" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.8360900166666667" soft_upper_limit="1.8360900166666667" />
+    <position_based_velocity_limits deceleration_limit="2.585" velocity_offset="0.2499685851463105" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="right_fr3v2_link3">
+    <visual name="right_fr3v2_link3_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link3.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.082540 0.019082 0.042027" />
+      <mass value="2.193082" />
+      <inertia ixx="0.010225" ixy="0.001144" ixz="0.003497" iyy="0.012398" iyz="0.002156" izz="0.006877" />
+    </inertial>
+  </link>
+  <link name="right_fr3v2_link3_accelerometer_top">
+      </link>
+  <joint name="right_fr3v2_link3_accelerometer_top_joint" type="fixed">
+    <origin rpy="-1.5708 0 0" xyz="0.0825 0.05 0" />
+    <parent link="right_fr3v2_link3" />
+    <child link="right_fr3v2_link3_accelerometer_top" />
+  </joint>
+  <link name="right_fr3v2_link3_accelerometer_bottom">
+      </link>
+  <joint name="right_fr3v2_link3_accelerometer_bottom_joint" type="fixed">
+    <origin rpy="1.5708 0 0" xyz="0.0825 0.04 0" />
+    <parent link="right_fr3v2_link3" />
+    <child link="right_fr3v2_link3_accelerometer_bottom" />
+  </joint>
+  <joint name="right_fr3v2_joint3" type="revolute">
+    <origin rpy="1.570796326794897 0 0" xyz="0 -0.316 0" />
+    <parent link="right_fr3v2_link2" />
+    <child link="right_fr3v2_link3" />
+    <axis xyz="0 0 1" />
+    <limit effort="87.0" lower="-2.9007400166666666" upper="2.9007400166666666" velocity="2.62" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.9007400166666666" soft_upper_limit="2.9007400166666666" />
+    <position_based_velocity_limits deceleration_limit="3.5" velocity_offset="0.20053055661577582" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="right_fr3v2_link4">
+    <visual name="right_fr3v2_link4_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link4.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.087533 0.096335 0.010120" />
+      <mass value="2.181537" />
+      <inertia ixx="0.008878" ixy="-0.003749" ixz="0.001139" iyy="0.007628" iyz="-0.00046" izz="0.010295" />
+    </inertial>
+  </link>
+  <link name="right_fr3v2_link4_accelerometer_top">
+      </link>
+  <joint name="right_fr3v2_link4_accelerometer_top_joint" type="fixed">
+    <origin rpy="1.5708 0 0" xyz="-0.0825 0.05 0" />
+    <parent link="right_fr3v2_link4" />
+    <child link="right_fr3v2_link4_accelerometer_top" />
+  </joint>
+  <link name="right_fr3v2_link4_accelerometer_bottom">
+      </link>
+  <joint name="right_fr3v2_link4_accelerometer_bottom_joint" type="fixed">
+    <origin rpy="-1.5708 0 0" xyz="-0.0825 0.06 0" />
+    <parent link="right_fr3v2_link4" />
+    <child link="right_fr3v2_link4_accelerometer_bottom" />
+  </joint>
+  <joint name="right_fr3v2_joint4" type="revolute">
+    <origin rpy="1.570796326794897 0 0" xyz="0.0825 0 0" />
+    <parent link="right_fr3v2_link3" />
+    <child link="right_fr3v2_link4" />
+    <axis xyz="0 0 1" />
+    <limit effort="87.0" lower="-3.077020016666667" upper="-0.11693708333333333" velocity="2.62" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.077020016666667" soft_upper_limit="-0.11693708333333333" />
+    <position_based_velocity_limits deceleration_limit="4.0" velocity_offset="0.3542181933842238" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="right_fr3v2_link5">
+    <visual name="right_fr3v2_link5_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link5.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.008383 0.010180 -0.053265" />
+      <mass value="2.186881" />
+      <inertia ixx="0.031874" ixy="0.000134" ixz="-0.000265" iyy="0.029674" iyz="-0.004734" izz="0.004751" />
+    </inertial>
+  </link>
+  <link name="right_fr3v2_link5_accelerometer_top">
+      </link>
+  <joint name="right_fr3v2_link5_accelerometer_top_joint" type="fixed">
+    <origin rpy="-1.5708 0 0" xyz="0 0.11 0" />
+    <parent link="right_fr3v2_link5" />
+    <child link="right_fr3v2_link5_accelerometer_top" />
+  </joint>
+  <link name="right_fr3v2_link5_accelerometer_bottom">
+      </link>
+  <joint name="right_fr3v2_link5_accelerometer_bottom_joint" type="fixed">
+    <origin rpy="1.5708 0 0" xyz="0 0.1 0" />
+    <parent link="right_fr3v2_link5" />
+    <child link="right_fr3v2_link5_accelerometer_bottom" />
+  </joint>
+  <joint name="right_fr3v2_joint5" type="revolute">
+    <origin rpy="-1.570796326794897 0 0" xyz="-0.0825 0.384 0" />
+    <parent link="right_fr3v2_link4" />
+    <child link="right_fr3v2_link5" />
+    <axis xyz="0 0 1" />
+    <limit effort="12.0" lower="-2.87630335" upper="2.87630335" velocity="5.26" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.87630335" soft_upper_limit="2.87630335" />
+    <position_based_velocity_limits deceleration_limit="17.0" velocity_offset="0.5738321197718637" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="right_fr3v2_link6">
+    <visual name="right_fr3v2_link6_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link6.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.070391 -0.016074 -0.035025" />
+      <mass value="1.579681" />
+      <inertia ixx="0.00286" ixy="-0.000553" ixz="-0.000638" iyy="0.00391" iyz="-0.00024" izz="0.00453" />
+    </inertial>
+  </link>
+  <joint name="right_fr3v2_joint6" type="revolute">
+    <origin rpy="1.570796326794897 0 0" xyz="0 0 0" />
+    <parent link="right_fr3v2_link5" />
+    <child link="right_fr3v2_link6" />
+    <axis xyz="0 0 1" />
+    <limit effort="12.0" lower="0.43982265" upper="4.62163335" velocity="4.18" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="0.43982265" soft_upper_limit="4.62163335" />
+    <position_based_velocity_limits deceleration_limit="5.5" velocity_offset="0.4884649342105264" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="right_fr3v2_link7">
+    <visual name="right_fr3v2_link7_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_arms/fr3v2/visual/link7.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.009108 0.018151 0.064946" />
+      <mass value="0.694841" />
+      <inertia ixx="0.000899" ixy="0.0" ixz="-1.3e-05" iyy="0.001099" iyz="-2.2e-05" izz="0.000702" />
+    </inertial>
+  </link>
+  <joint name="right_fr3v2_joint7" type="revolute">
+    <origin rpy="1.570796326794897 0 0" xyz="0.088 0 0" />
+    <parent link="right_fr3v2_link6" />
+    <child link="right_fr3v2_link7" />
+    <axis xyz="0 0 1" />
+    <limit effort="12.0" lower="-3.05083335" upper="3.05083335" velocity="5.26" />
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.05083335" soft_upper_limit="3.05083335" />
+    <position_based_velocity_limits deceleration_limit="17.0" velocity_offset="0.4591952376425851" />
+    <dynamics D="1" K="7000" damping="0.003" friction="0.2" mu_coulomb="0" mu_viscous="16" />
+  </joint>
+  <link name="right_fr3v2_link8" />
+  <joint name="right_fr3v2_joint8" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.107" />
+    <parent link="right_fr3v2_link7" />
+    <child link="right_fr3v2_link8" />
+  </joint>
+  <joint name="right_fr3v2_hand_joint" type="fixed">
+    <parent link="right_fr3v2_link8" />
+    <child link="right_fr3v2_hand" />
+    <origin rpy="0 0 -0.7853981633974483" xyz="0 0 0" />
+  </joint>
+  <link name="right_fr3v2_hand">
+    <visual name="right_fr3v2_hand_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_ee/franka_hand_white/visual/hand.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0000376 0.0119128 0.0207260" />
+      <mass value="0.6544" />
+      <inertia ixx="0.00186" ixy="0.0" ixz="0.0" iyy="0.0003" iyz="-2e-05" izz="0.00174" />
+    </inertial>
+  </link>
+  <link name="right_fr3v2_hand_tcp" />
+  <joint name="right_fr3v2_hand_tcp_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.1034" />
+    <parent link="right_fr3v2_hand" />
+    <child link="right_fr3v2_hand_tcp" />
+  </joint>
+  <link name="right_fr3v2_leftfinger">
+    <visual name="right_fr3v2_leftfinger_visual">
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_ee/franka_hand_white/visual/finger.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0.0152850 0.0219675" />
+      <mass value="0.0291" />
+      <inertia ixx="8.49e-06" ixy="0.0" ixz="0.0" iyy="8.53e-06" iyz="-1.06e-06" izz="1.77e-06" />
+    </inertial>
+  </link>
+  <link name="right_fr3v2_rightfinger">
+    <visual name="right_fr3v2_rightfinger_visual">
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/akhilsathuluri/git/sim_a_splat/robot_description/franka_dual_arm/meshes/robot_ee/franka_hand_white/visual/finger.obj" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0.0152850 0.0219675" />
+      <mass value="0.0291" />
+      <inertia ixx="8.49e-06" ixy="0.0" ixz="0.0" iyy="8.53e-06" iyz="-1.06e-06" izz="1.77e-06" />
+    </inertial>
+  </link>
+  <joint name="right_fr3v2_finger_joint1" type="prismatic">
+    <parent link="right_fr3v2_hand" />
+    <child link="right_fr3v2_leftfinger" />
+    <origin rpy="0 0 0" xyz="0 0 0.0584" />
+    <axis xyz="0 1 0" />
+    <limit effort="100" lower="0.0" upper="0.04" velocity="0.2" />
+    <dynamics damping="0.3" />
+  </joint>
+  <joint name="right_fr3v2_finger_joint2" type="prismatic">
+    <parent link="right_fr3v2_hand" />
+    <child link="right_fr3v2_rightfinger" />
+    <origin rpy="0 0 3.141592653589793" xyz="0 0 0.0584" />
+    <axis xyz="0 1 0" />
+    <limit effort="100" lower="0.0" upper="0.04" velocity="0.2" />
+    <mimic joint="right_fr3v2_finger_joint1" />
+    <dynamics damping="0.3" />
+  </joint>
+</robot>

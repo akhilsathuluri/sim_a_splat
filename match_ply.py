@@ -1,57 +1,37 @@
 # %%
 import open3d as o3d
 import numpy as np
-import torch
 import logging
 import tempfile
-import viser.transforms as tf
 from pathlib import Path
-from sim_a_splat.splat.splat_utils import GSplatLoader
+import matplotlib.pyplot as plt
+
+from plyfile import PlyData
 from urchin import URDF
 from copy import deepcopy as pycopy
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
+_C0 = 0.28209479177387814
+
+
+def sh2rgb(sh):
+    return sh * _C0 + 0.5
+
+
 # %%
 # --------------------------------------------
 # CHANGE TO CUSTOM ROBOT
-# urdf_location = (
-#     Path("./robot_description/xarm_description/xarm6/urdf/xarm6_with_push_gripper.urdf")
-#     .resolve()
-#     .__str__()
-# )
-# # a tag for the object in the splat that is being matched
-# match_object_name = "xarm6-2"
-# package_tag = "package://xarm6"
-# output_dir = (
-#     Path("assets/robots-scene-v2/masks" + f"/{match_object_name}/").resolve().__str__()
-# )
-# splat_path_string = "assets/robots-scene-v2/splatfacto/2024-12-06_150850/config.yml"
-# robot_mesh_dir = Path("./robot_description/xarm_description/xarm6/").resolve()
-
-# urdf_location = (
-#     Path("./robot_description/divar113vhw/urdf/divar113vhw.urdf").resolve().__str__()
-# )
-# match_object_name = "divar113vhw"
-# package_tag = "package://divar113vhw"
-# output_dir = (
-#     Path("assets/divar113vhw/masks" + f"/{match_object_name}/").resolve().__str__()
-# )
-# splat_path_string = "assets/divar113vhw/splatfacto/2025-06-03_191520/config.yml"
-# robot_mesh_dir = Path("./robot_description/divar113vhw/").resolve()
-
 urdf_location = (
-    Path("./robot_description/franka_dual_arm/urdf/franka_duo_drake.urdf")
+    Path("./robot_description/franka_dual_arm/urdf/fr3_duo_drake.urdf")
     .resolve()
     .__str__()
 )
-match_object_name = "franka_duo_drake"
+match_object_name = "fr3_duo_drake"
 package_tag = "package://franka_dual_arm"
-output_dir = (
-    Path("assets/franka_dual_arm/masks" + f"/{match_object_name}/").resolve().__str__()
-)
-splat_path_string = "assets/franka_dual_arm/splatfacto/2025-06-03_191520/config.yml"
+output_dir = Path("assets/cppoc/masks" + f"/{match_object_name}/").resolve().__str__()
+ply_path_string = "assets/cppoc/export_30000_cropped.ply"
 robot_mesh_dir = Path("./robot_description/franka_dual_arm/").resolve()
 
 
@@ -79,9 +59,14 @@ robot = URDF.load(tmp_urdf_location)
 actuated_joint_names = [
     robot.actuated_joints[ii].name for ii in range(len(robot.actuated_joints))
 ]
-joint_config = np.array([0.2, 3.0, 3.14, 0, 0])
+# get sorted names
+sorted_joint_names = sorted(actuated_joint_names)
+right_robot_home = [0.0, 0.0, 0.0, 0.0, -2.0, 0.9, 1.7, 0.0]
+left_robot_home = [0.0, 0.0, 0.0, 0.0, -2.0, -0.9, 1.7, -np.pi / 2]
+
+joint_config = np.array(right_robot_home + left_robot_home)
 np.save(output_dir + "/joint_config.npy", joint_config)
-cfg = dict(zip(actuated_joint_names, joint_config))
+cfg = dict(zip(sorted_joint_names, joint_config))
 translist = robot.visual_geometry_fk(cfg)
 
 # %%
@@ -96,7 +81,7 @@ for ii in range(len(robot.links)):
             meshes.append(mesh)
 
 # %%
-select_meshes = meshes[:7]
+select_meshes = meshes
 if len(select_meshes) == 1:
     select_meshes = [select_meshes]
 
@@ -123,65 +108,52 @@ o3d.visualization.draw_plotly([temp_robot_pcd])
 robot_pcd = temp_robot_pcd
 
 # %%
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-path_to_gsplat = (Path(__file__).parent / splat_path_string).resolve()
-gsplat = GSplatLoader(path_to_gsplat, device)
-rotation = tf.SO3.from_x_radians(0.0).wxyz
+
+path_to_ply = (Path(__file__).parent / ply_path_string).resolve()
+plydata = PlyData.read(str(path_to_ply))
+v = plydata.elements[0]
 
 # %%
 bounds = None
-if bounds is not None:
-    mask = torch.all(
-        (gsplat.means - bounds[0] >= 0) & (bounds[1] - gsplat.means >= 0), dim=-1
+means = np.stack([np.asarray(v["x"]), np.asarray(v["y"]), np.asarray(v["z"])], axis=1)
+colors = sh2rgb(
+    np.stack(
+        [np.asarray(v["f_dc_0"]), np.asarray(v["f_dc_1"]), np.asarray(v["f_dc_2"])],
+        axis=1,
     )
-else:
-    mask = torch.ones(gsplat.means.shape[0], dtype=torch.bool, device=device)
+)
 
-means = gsplat.means[mask].cpu().numpy()
-covs = gsplat.covs[mask].cpu().numpy()
-colors = gsplat.colors[mask].cpu().numpy()
-opacities = gsplat.opacities[mask].cpu().numpy()
+if bounds is not None:
+    mask = np.all((means - bounds[0] >= 0) & (bounds[1] - means >= 0), axis=-1)
+else:
+    mask = np.ones(means.shape[0], dtype=bool)
 
 splat_pcd = o3d.geometry.PointCloud()
 splat_pcd.points = o3d.utility.Vector3dVector(means)
+splat_pcd.colors = o3d.utility.Vector3dVector(colors)
 
 # %%
 o3d.visualization.draw_plotly([splat_pcd])
 
 # %%
-vol = o3d.visualization.SelectionPolygonVolume()
-vol.orthogonal_axis = "Z"
-
 # --------------------------------------------
 # CHANGE THESE VALUES TO CROP THE OBJECT TO BE MATCHED
-# vol.axis_min = -0.312
-# vol.axis_max = 0.2
-# # fmt: off
-# polygon_bounds = o3d.utility.Vector3dVector([
-#     [0.3, -0.06, 0],
-#     [0.49, -0.06, 0],
-#     [0.49, 0.18, 0],
-#     [0.3, 0.18, 0]
-# ])
-# # fmt: on
-
-vol.axis_min = -0.3
-vol.axis_max = 0.1
-# fmt: off
-polygon_bounds = o3d.utility.Vector3dVector([
-    [-0.25, 0.2, 0],
-    [0.42, 0.2, 0],
-    [0.42, 0.62, 0],
-    [-0.25, 0.62, 0]
-])
-# fmt: on
-
+x_min, x_max = -0.405, -0.01
+y_min, y_max = -0.38, 0.0
+z_min, z_max = -0.30, 0.30
 # --------------------------------------------
 
-vol.bounding_polygon = o3d.utility.Vector3dVector(polygon_bounds)
-crop_robot = vol.crop_point_cloud(splat_pcd)
-o3d.visualization.draw_plotly([crop_robot])
+polygon_bounds = np.array([[x_min, y_min, z_min], [x_max, y_max, z_max]])
 
+bbox = o3d.geometry.AxisAlignedBoundingBox(
+    min_bound=[x_min, y_min, z_min],
+    max_bound=[x_max, y_max, z_max],
+)
+crop_robot = splat_pcd.crop(bbox)
+
+splat_pcd_context = pycopy(splat_pcd)
+splat_pcd_context.paint_uniform_color([0.8, 0.8, 0.8])
+o3d.visualization.draw_plotly([splat_pcd_context, crop_robot])
 
 # %%
 np.save(output_dir + "/polygon_bounds.npy", polygon_bounds)
@@ -189,31 +161,18 @@ logging.info(f"Saved cropping polygon_bounds to {output_dir + '/polygon_bounds.n
 logging.warning("Using existing bounding polygon guess. Modify if needed.")
 
 # %%
-center_crop_robot = crop_robot.get_center()
-center_robot_pcd = robot_pcd.get_center()
-translate_robot_pcd_to_crop = center_crop_robot - center_robot_pcd
-# --------------------------------------------
-# CHANGE THESE VALUES TO CUSTOM ROBOT
-# R = robot_pcd.get_rotation_matrix_from_xyz((0, 0, -np.pi / 2))
-# threshold = 0.2
-# trans_init = np.eye(4)
-# scale_init = 1
-# adjusted_offset = np.array([0, 0, 0])
-
-R = robot_pcd.get_rotation_matrix_from_xyz((0, 0, 0))
-threshold = 0.2
 trans_init = np.eye(4)
-scale_init = 1
-adjusted_offset = np.array([0, 0, 0])
-# --------------------------------------------
+scale_init = 0.5
+adjusted_offset = np.array([0.4, 0.2, 0.32])
+R = robot_pcd.get_rotation_matrix_from_xyz((-np.pi / 2, np.pi, 0))
+
+trans_init[:3, 3] = crop_robot.get_center() - robot_pcd.get_center() + adjusted_offset
 trans_init[:3, :3] = scale_init * R
-trans_init[:3, 3] = translate_robot_pcd_to_crop + adjusted_offset
 logging.warning("Using existing transformation guess. Modify if needed.")
 
 # visualisation
 temp_robot_pcd = pycopy(robot_pcd)
-temp_robot_pcd.translate(trans_init[:3, 3])
-temp_robot_pcd.rotate(trans_init[:3, :3])
+temp_robot_pcd.transform(trans_init)
 o3d.visualization.draw_plotly([temp_robot_pcd, crop_robot])
 
 # %%
@@ -222,6 +181,7 @@ np.save(output_dir + "/trans_init.npy", trans_init)
 estimation_method = o3d.pipelines.registration.TransformationEstimationPointToPoint()
 estimation_method.with_scaling = True
 
+threshold = 0.22
 reg_p2p = o3d.pipelines.registration.registration_icp(
     source=robot_pcd,
     target=crop_robot,
@@ -266,17 +226,13 @@ for tmesh in temp_meshes:
 
 colored_points = np.zeros((points.shape[0], 3))
 
-colors = [
-    [1, 0, 0],  # Red
-    [0, 1, 0],  # Green
-    [0, 0, 1],  # Blue
-    [1, 1, 0],  # Yellow
-    [1, 0, 1],  # Magenta
-    [0, 1, 1],  # Cyan
-]
+n_links = len(link_masks_local)
+link_colors = np.array(
+    [plt.get_cmap("tab20")(i / max(n_links, 1))[:3] for i in range(n_links)]
+)
 
 for i, link_mask in enumerate(link_masks_local):
-    colored_points[link_mask] = colors[i % len(colors)]
+    colored_points[link_mask] = link_colors[i]
 
 colored_pcd = o3d.geometry.PointCloud()
 colored_pcd.points = o3d.utility.Vector3dVector(points)
