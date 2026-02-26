@@ -221,7 +221,7 @@ def MakeHardwareStation(
         robot_controller.get_input_port_estimated_state(), "robot_estimated_state"
     )
     builder.ExportOutput(
-        robot_controller.GetOutputPort("actuation"), "robot_torque_commanded"
+        robot_controller.GetOutputPort("generalized_force"), "robot_torque_commanded"
     )
     desired_state_from_position = builder.AddSystem(
         StateInterpolatorWithDiscreteDerivative(

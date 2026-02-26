@@ -204,8 +204,16 @@ class PlySplatHandler:
         actuated_joint_names = sorted(
             robot.actuated_joints[ii].name for ii in range(len(robot.actuated_joints))
         )
-        fk = robot.visual_trimesh_fk(cfg=dict(zip(actuated_joint_names, joint_config)))
-        translist = list(fk.values())
+        # Use link_fk (not visual_trimesh_fk) so that fk_tf is in the LINK frame,
+        # consistent with Drake's lcmt_viewer_draw which sends link-frame poses.
+        # The visual origin cancels in the transform formula, so only link FK is needed.
+        # link_fk() returns {Link_object: matrix}; convert to {link_name: matrix}.
+        link_fk_dict = {
+            link.name: mat
+            for link, mat in robot.link_fk(
+                cfg=dict(zip(actuated_joint_names, joint_config))
+            ).items()
+        }
 
         meshes = []
         colors = []
@@ -242,7 +250,7 @@ class PlySplatHandler:
             )
             self.mesh_trimeshs.append(mesh_trimesh)
             self.mesh_frame_handles.append(mesh_frame_handle)
-            self.fk_tf.append(tf.SE3.from_matrix(translist[ii]))
+            self.fk_tf.append(tf.SE3.from_matrix(link_fk_dict[mesh_link_names[ii]]))
 
         # Map URDF link name → list of mesh handle indices for that link
         self.mesh_link_names = mesh_link_names
