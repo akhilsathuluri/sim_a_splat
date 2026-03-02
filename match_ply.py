@@ -65,8 +65,8 @@ right_robot_home = [0.0, 0.0, 0.0, 0.0, -2.0, 0.9, 1.7, 0.0]
 left_robot_home = [0.0, 0.0, 0.0, 0.0, -2.0, -0.9, 1.7, -np.pi / 2]
 
 joint_config = np.array(right_robot_home + left_robot_home)
-np.save(output_dir + "/joint_config.npy", joint_config)
 cfg = dict(zip(sorted_joint_names, joint_config))
+np.save(output_dir + "/joint_config.npy", cfg, allow_pickle=True)
 translist = robot.visual_geometry_fk(cfg)
 
 # %%

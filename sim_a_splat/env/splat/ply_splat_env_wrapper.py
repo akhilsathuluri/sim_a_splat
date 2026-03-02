@@ -2,6 +2,7 @@
 import gymnasium as gym
 import numpy as np
 import viser
+from pydrake.all import JointIndex
 import viser.transforms as tf
 import logging
 import time
@@ -100,7 +101,33 @@ class PlySplatEnvWrapper(gym.Wrapper):
             raise RuntimeError("No clients connected after waiting")
         return client[0]
 
+    def _saved_joint_config_to_drake_positions(self):
+        """Convert the saved joint-name dict to a flat array in Drake's position ordering."""
+        plant = self.unwrapped.plant
+        model_instance = self.unwrapped.robot_model_instance
+        joint_config_dict = self.splat_handler.joint_config_dict
+        # Collect joints belonging to this model instance, sorted by global position_start
+        mi_joints = sorted(
+            (
+                plant.get_joint(JointIndex(i))
+                for i in range(plant.num_joints())
+                if plant.get_joint(JointIndex(i)).model_instance() == model_instance
+                and plant.get_joint(JointIndex(i)).num_positions() > 0
+            ),
+            key=lambda j: j.position_start(),
+        )
+        q = np.zeros(plant.num_positions(model_instance))
+        local_idx = 0
+        for joint in mi_joints:
+            npos = joint.num_positions()
+            if joint.name() in joint_config_dict:
+                q[local_idx : local_idx + npos] = joint_config_dict[joint.name()]
+            local_idx += npos
+        return q
+
     def reset(self, seed: Optional[int] = None, reset_to_state=None):
+        if reset_to_state is None:
+            reset_to_state = {"robot_pos": self._saved_joint_config_to_drake_positions()}
         self.unwrapped.reset(seed=seed, reset_to_state=reset_to_state)
         self.draw_msg = self.unwrapped._generate_draw_msg()
         self.splat_handler.draw_handler(self.draw_msg)
