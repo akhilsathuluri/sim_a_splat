@@ -92,7 +92,9 @@ def add_ground_with_friction(plant):
 
 
 def add_soft_collisions(plant, eef_link_name):
-    eef_link_names = [eef_link_name] if isinstance(eef_link_name, str) else eef_link_name
+    eef_link_names = (
+        [eef_link_name] if isinstance(eef_link_name, str) else eef_link_name
+    )
     dissipation = 1e4
     point_stiffness = 1e7
     surface_friction_feet = CoulombFriction(static_friction=0, dynamic_friction=0)
@@ -102,8 +104,8 @@ def add_soft_collisions(plant, eef_link_name):
     )
     AddCompliantHydroelasticProperties(0.05, 5e6, proximity_properties_feet)
 
-    radius, length = 0.013, 0.05
-    offset = np.array([0.0, 0.0, 0.19])
+    radius, length = 0.013, 0.1
+    offset = np.array([0.0, 0.0, 0.15])
     for name in eef_link_names:
         plant.RegisterCollisionGeometry(
             plant.GetBodyByName(name),
@@ -153,7 +155,9 @@ def AddRobotModel(
 
 
 def configure_contacts(plant, eef_link_name, scene_graph, robot_model_instance):
-    eef_link_names = [eef_link_name] if isinstance(eef_link_name, str) else eef_link_name
+    eef_link_names = (
+        [eef_link_name] if isinstance(eef_link_name, str) else eef_link_name
+    )
     plant.set_contact_model(ContactModel.kHydroelasticsOnly)
     add_ground_with_friction(plant)
     add_soft_collisions(plant, eef_link_name=eef_link_names)
