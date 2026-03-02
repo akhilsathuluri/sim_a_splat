@@ -202,14 +202,13 @@ class PlySplatHandler:
         self.joint_config_dict = np.load(
             self.masks_dir + "/joint_config.npy", allow_pickle=True
         ).item()
-        joint_config_dict = self.joint_config_dict
         # Use link_fk (not visual_trimesh_fk) so that fk_tf is in the LINK frame,
         # consistent with Drake's lcmt_viewer_draw which sends link-frame poses.
         # The visual origin cancels in the transform formula, so only link FK is needed.
         # link_fk() returns {Link_object: matrix}; convert to {link_name: matrix}.
         link_fk_dict = {
             link.name: mat
-            for link, mat in robot.link_fk(cfg=joint_config_dict).items()
+            for link, mat in robot.link_fk(cfg=self.joint_config_dict).items()
         }
 
         meshes = []
