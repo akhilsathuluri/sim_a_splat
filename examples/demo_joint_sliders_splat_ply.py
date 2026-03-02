@@ -1,8 +1,11 @@
 from pathlib import Path
+import logging
 import time
 import numpy as np
 import sys
 import viser.transforms as tf
+
+logging.basicConfig(level=logging.WARNING)
 
 sys.path.append(Path(__file__).resolve().parent.parent.__str__())
 from sim_a_splat.env.manipulator.manipulator_env import ManipulatorSimEnv
@@ -19,14 +22,10 @@ def main():
     urdf_name = "fr3_duo_drake.urdf"
     eef_link_name = ["right_fr3v2_link8", "left_fr3v2_link8"]  # check URDF link names
     num_dof = 18  # 7 arm + 2 finger joints per arm × 2 arms
-    right_home = [0.0, 0.0, 0.0, 0.0, -2.0, 0.9, 1.7, 0.0, 0.0]    # joints 1-7 + fingers 1-2
-    left_home = [0.0, 0.0, 0.0, 0.0, -2.0, -0.9, 1.7, 0.0, 0.0]    # joints 1-7 + fingers 1-2
-    home_config = right_home + left_home
 
-    splat_assets_path = (root / "assets/cppoc").__str__()
+    splat_assets_path = root / "assets/cppoc"
     match_object_name = "fr3_duo_drake"
     ply_name = "export_30000_cropped.ply"
-    # --------------------------------------------
 
     manipulator_env = ManipulatorSimEnv(
         env_objects=False,
@@ -37,6 +36,23 @@ def main():
         urdf_name=urdf_name,
         num_dof=num_dof,
     )
+
+    # Load initial config from joint_config.npy and map to actual joint names
+    joint_config_dict = np.load(
+        splat_assets_path / "masks" / match_object_name / "joint_config.npy",
+        allow_pickle=True,
+    ).item()
+
+    # Get actuated joint names from the drake plant (scoped to robot model)
+    plant = manipulator_env.plant
+    model = manipulator_env.robot_model_instance
+    joint_names = plant.GetPositionNames(model, always_add_suffix=False)
+
+    # Extract values from dict using actual joint names, default to 0 if not found
+    home_config = np.array([joint_config_dict.get(name, 0.0) for name in joint_names])
+
+    splat_assets_path = splat_assets_path.__str__()
+    # --------------------------------------------
 
     camera_setup_info = {
         "viewport": {

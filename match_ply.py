@@ -33,8 +33,6 @@ package_tag = "package://franka_dual_arm"
 output_dir = Path("assets/cppoc/masks" + f"/{match_object_name}/").resolve().__str__()
 ply_path_string = "assets/cppoc/export_30000_cropped.ply"
 robot_mesh_dir = Path("./robot_description/franka_dual_arm/").resolve()
-
-
 # --------------------------------------------
 
 # %%
