@@ -10,7 +10,7 @@ from pydrake.all import (
 
 
 class ManipulatorEEFWrapper(gym.Wrapper):
-    def __init__(self, env, theta_bound=1e-4):
+    def __init__(self, env, theta_bound=1e-4, eef_index=0):
         super().__init__(env)
 
         self.observation_space = gym.spaces.Dict(
@@ -49,13 +49,16 @@ class ManipulatorEEFWrapper(gym.Wrapper):
                 ),
             }
         )
+        self.eef_index = eef_index
         self.theta_bound = theta_bound
 
     def eefpose2config(self, eefpose):
         eef_transform = RigidTransform(
             RotationMatrix(RollPitchYaw(eefpose[3:])), eefpose[:3]
         )
-        self.end_effector_frame = self.unwrapped.end_effector_body.body_frame()
+        self.end_effector_frame = self.unwrapped.end_effector_bodies[
+            self.eef_index
+        ].body_frame()
         ik = InverseKinematics(self.unwrapped.plant, self.unwrapped.plant_context)
         ik.AddPositionConstraint(
             frameB=self.end_effector_frame,
@@ -88,11 +91,12 @@ class ManipulatorEEFWrapper(gym.Wrapper):
 
         q_desired = self.eefpose2config(eefpose)
         obs_in, reward, terminated, truncated, info_in = self.env.step(q_desired)
+        eef_info = info_in["eef_infos"][self.eef_index]
         obs = {
-            "eef_pos": info_in["eef_pos"],
-            "eef_quat": info_in["eef_quat"],
-            "eef_pos_vel": info_in["eef_pos_vel"],
-            "eef_rot_vel": info_in["eef_rot_vel"],
+            "eef_pos": eef_info["eef_pos"],
+            "eef_quat": eef_info["eef_quat"],
+            "eef_pos_vel": eef_info["eef_pos_vel"],
+            "eef_rot_vel": eef_info["eef_rot_vel"],
         }
         info = {
             "robot_joint_pos": obs_in["robot_joint_pos"],
